@@ -5,15 +5,18 @@ app = Flask('Kyoyobot')
 
 @app.route('/')
 def route_index():
-    #sets up a throwaway route for the flask app
+    '''Receives pings to keep the server running.'''
+    
     return '🐛'
 
 def launch_server():
-    #runs the flask app
+    '''Starts a server to receive pings that keep the application awake.'''
+    
     app.run(host='0.0.0.0', port=8080)
 
 def run():
-    #runs a server that gets pinged periodically so that the bot doesn't shut off
+    '''Runs this module.'''
+
     #imagine paying for server hosting 🐛
     server = Thread(target=launch_server)
     server.start()
