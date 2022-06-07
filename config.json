@@ -2,7 +2,11 @@
     "stickers": [
         {
             "name": "beelau",
-            "image_url": "https://96lb.ml/beelau"
+            "url": "https://96lb.ml/beelau"
+        },
+        {
+            "name": "kyoyobug",
+            "url": "https://cdn.discordapp.com/attachments/463454211791912980/983749422502510662/954128091427536897.webp"
         }
     ]
 }

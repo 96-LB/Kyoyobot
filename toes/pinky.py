@@ -1,7 +1,7 @@
 from discord import app_commands as slash, Interaction
 from util.debug import DEBUG_GUILD
 
-DEBUG = True
+DEBUG = False
 
 @slash.command()
 async def ping(interaction: Interaction):
