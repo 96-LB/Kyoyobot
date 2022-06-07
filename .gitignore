@@ -5,3 +5,4 @@ venv
 .breakpoints
 replit.nix
 .replit
+.env
