@@ -5,7 +5,7 @@ description = "🐛"
 authors = ["96 LB <96lb@96lb.ml>", "A bunch of other people probably"]
 
 [tool.poetry.dependencies]
-python = ">=3.8.0,<3.9"
+python = ">=3.8.0"
 "discord.py" = {git = "https://github.com/Rapptz/discord.py"}
 Flask = "^2.1.2"
 
