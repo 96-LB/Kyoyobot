@@ -1,6 +1,6 @@
 import os, json
 
-CONFIG_PATH = os.path.join(os.getcwd(), 'config.json') 
+CONFIG_PATH = os.path.join(os.getcwd(), 'config.jason') 
 
 def load_sticker_config():
     '''Loads and returns list of sticker configs from config.json.'''
