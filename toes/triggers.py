@@ -1,16 +1,54 @@
-import random
+import random, discord
 from discord import app_commands as slash, Message, Client
-from typing import Callable, Awaitable, List, Dict, TypeVar
+from functools import wraps
+from typing import Callable, Any, Awaitable, List, Dict, Protocol, TypeVar
 from util.debug import DEBUG_GUILD
 from util.settings import Config
 
 DEBUG = True
 
+class Trigger(Protocol):
+    async def __call__(self, bot: Client, message: Message) -> None: ...
+
+def if_keyword(keyword: str):
+    def wrapper(trigger: Trigger):
+        @wraps(trigger)
+        async def wrapped(bot: Client, message: Message, **kwargs: Any):
+            if keyword in message.content:
+                await trigger(bot, message, **kwargs)
+        return wrapped
+    return wrapper
+
+def with_probability(probability: float):
+    def wrapper(trigger: Trigger):
+        @wraps(trigger)
+        async def wrapped(bot: Client, message: Message, **kwargs: Any):
+            if random.random() <= probability:
+                await trigger(bot, message, **kwargs)
+        return wrapped
+    return wrapper
+
+def trigger_send_response(response: str) -> Trigger:
+    async def trigger(bot: Client, message: Message) -> None:
+        await message.channel.send(response)
+    return trigger
+
+def trigger_reaction_custom(emoji_id: int) -> Trigger:
+    async def trigger(bot: Client, message: Message) -> None:
+        await message.add_reaction(bot.get_emoji(emoji_id))
+    return trigger
+    
+def trigger_reaction_standard(emoji: str) -> Trigger:
+    async def trigger(bot: Client, message: Message) -> None:
+        await message.add_reaction(emoji)
+    return trigger
+
+
 class Trigger:
     '''Provides generic functionality for triggers.'''
 
     def __init__(self, filter_handler: Callable[[Message], Awaitable[bool]], \
-        response_handler: Callable[[Message], Awaitable[None]], probability: float) -> None:
+        response_handler: Callable[[Client, Message], Awaitable[None]], probability: float) -> None:
         '''Creates a generic Trigger instance.'''
 
         # Validate probability (must be in the range [0.0, 1.0])
@@ -21,12 +59,12 @@ class Trigger:
         self._response_handler = response_handler
         self._probability = probability
 
-    async def process_message(self, message: Message) -> None:
+    async def process_message(self, bot: Client, message: Message) -> None:
         '''Processes messages fed in from on_message() event.'''
 
         if await self._filter_handler(message):
             if random.random() <= self._probability:
-                await self._response_handler(message)
+                await self._response_handler(bot, message)
 
 
 T = TypeVar('T', bound='KeywordTrigger')
@@ -49,11 +87,7 @@ class KeywordTrigger(Trigger):
     def from_phrase_response(cls, keyword: str, phrase_response: str, probability: float) -> T: 
         '''Creates a simple KeywordTrigger that sends a message with the given phrase.'''
 
-        def generate_response_handler():
-            async def _(message: Message):
-                await message.channel.send(phrase_response)
-            return _
-        return cls(keyword, generate_response_handler(), probability)
+        return cls(keyword, trigger_send_response(phrase_response), probability)
 
     @classmethod
     def from_reaction_response(cls, keyword: str, emoji_name: str, is_custom_emoji: bool, probability: float) -> T:
@@ -64,15 +98,8 @@ class KeywordTrigger(Trigger):
             on parameter is_custom_emoji
         '''
 
-        def generate_response_handler():
-            async def _(message: Message):
-                if is_custom_emoji:
-                    emoji = discord.utils.get(message.guild.emojis, name=emoji_name)
-                else:
-                    emoji = emoji_name
-                await message.add_reaction(emoji)
-            return _
-        return cls(keyword, generate_response_handler(), probability)
+
+        return cls(keyword, (lambda x, y: '') if is_custom_emoji else trigger_reaction_standard(emoji_name), probability)
 
 class TriggerManager:
     '''Stores and manages all trigger instances.'''
@@ -111,14 +138,16 @@ class TriggerManager:
         TriggerManager._triggers.append(trigger)
 
     @classmethod
-    async def process_message_all(cls, message: Message) -> None:
+    async def process_message_all(cls, bot: Client, message: Message) -> None:
         '''Processes all triggers.'''
 
         for trigger in TriggerManager._triggers:
-            await trigger.process_message(message)
+            await trigger.process_message(bot, message)
 
 def setup(bot: Client, tree: slash.CommandTree) -> None:
     '''Sets up this bot module.'''
+
+    TriggerManager.load_from_config()
     
     @bot.event
     async def on_message(message: Message) -> None:
@@ -126,4 +155,4 @@ def setup(bot: Client, tree: slash.CommandTree) -> None:
         if message.author == bot.user:
             return
         if not DEBUG or message.guild.id == DEBUG_GUILD.id: #todo: change this
-            await TriggerManager.process_message_all(message)
+            await TriggerManager.process_message_all(bot, message)

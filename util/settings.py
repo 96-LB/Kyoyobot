@@ -10,8 +10,7 @@ class Settings(ABC):
     
     @property
     @abstractmethod
-    def SETTINGS_FILE(self) -> str:
-        pass
+    def SETTINGS_FILE(self) -> str: ...
 
     @classmethod
     @abstractmethod
