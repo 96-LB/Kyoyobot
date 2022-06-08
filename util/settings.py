@@ -71,7 +71,7 @@ class Config(Settings):
 class Env(Settings):
     '''Handles sensitive or secret configuration data pulled from environment variables.'''
     
-    SETTINGS_FILE: str = 'env'
+    SETTINGS_FILE: str = '.env'
     
     @classmethod
     def load_file(cls, file: TextIO) -> None:
