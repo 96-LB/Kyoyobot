@@ -2,15 +2,18 @@
     "stickers": [
         {
             "name": "beelau",
-            "url": "https://96lb.ml/beelau"
+            "url": "https://96lb.ml/beelau",
+            "description": "definitely not racist"
         },
         {
             "name": "kyoyobug",
-            "url": "https://cdn.discordapp.com/attachments/463454211791912980/983749422502510662/954128091427536897.webp"
+            "url": "https://cdn.discordapp.com/attachments/463454211791912980/983749422502510662/954128091427536897.webp",
+            "description": "🐛"
         },
         {
             "name": "xf",
-            "url": "https://cdn.discordapp.com/emojis/981421960879812618.webp"
+            "url": "https://cdn.discordapp.com/emojis/981421960879812618.webp",
+            "description": "Failure due to academic dishonesty"
         }
     ]
 }

@@ -1,6 +1,7 @@
 import os, json
 from abc import ABC, abstractmethod
 from typing import Any, Dict, TextIO
+from util.debug import error
 
 class Settings(ABC):
     '''Handles configuration data.'''
@@ -55,10 +56,15 @@ class Config(Settings):
     def load_file(cls, file: TextIO) -> None:
         '''Initializes the configuration data from the configuration JSON file.'''
 
+        cls._data = {}
+        
         #attempts to load as a json object
-        cls._data = json.loads(file.read())
-        if isinstance(cls._data, list):
-            cls._data = {}
+        try:
+            obj = json.loads(file.read())
+            if isinstance(obj, dict):
+                cls._data = obj
+        except json.decoder.JSONDecodeError as e:
+            error(e, 'Failed to load configuration data!')
 
 
 

@@ -1,5 +1,7 @@
 from discord import app_commands as slash, Interaction
-from util.debug import DEBUG_GUILD
+from discord.errors import HTTPException
+from discord.app_commands.errors import CommandAlreadyRegistered
+from util.debug import DEBUG_GUILD, error
 from util.settings import Config
 
 DEBUG = False
@@ -7,23 +9,33 @@ DEBUG = False
 def add_sticker_command(group: slash.Group, name: str, url: str, description: str=None):
     '''Generates a sticker commmand and adds it to the specified command group.'''
 
-    if name is None or url is None:
-        return
+    description = str(description) if description is not None else f'Posts the {name} sticker.'
 
-    description = description if description is not None else f'Posts the {name} sticker.'
-
-    @group.command(name=name, description=description)
-    async def _(interaction: Interaction):
-        await interaction.response.send_message(url)
-
+    #attempt to add the command and return whether it succeeded
+    try:
+        @group.command(name=name, description=description)
+        async def _(interaction: Interaction):
+            await interaction.response.send_message(str(url))
+            
+        return True
+        
+    except (HTTPException, TypeError, CommandAlreadyRegistered) as e:
+        error(e, f'Failed to add {name} sticker!')
+        
+        return False
+    
 def setup(tree):
     '''Sets up this command group.'''
 
     stickers = slash.Group(name='stickers', description='Posts stickers from a preset collection.')
 
     #load each sticker command from the configuration file
-    sticker_configs = Config.get('stickers', {})
+    sticker_configs = Config.get('stickers', [])
     for sticker_config in sticker_configs:
-        add_sticker_command(stickers, **sticker_config)
+        name = sticker_config.get('name')
+        url = sticker_config.get('url')
+        description = sticker_config.get('description')
+        
+        add_sticker_command(stickers, name, url, description)
 
     tree.add_command(stickers, guild=(DEBUG_GUILD if DEBUG else None))
