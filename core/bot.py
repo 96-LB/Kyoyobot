@@ -1,11 +1,15 @@
+from http import client
 import os, discord
 from importlib import import_module
 from util.bot import set_status
 from util.debug import DEBUG_GUILD
 from util.settings import Env
+from extras.triggers import Trigger, TriggerManager
 
 #set up the discord client
 intents = discord.Intents().default()
+intents.messages = True
+intents.message_content = True
 bot = discord.Client(intents=intents)
 tree = discord.app_commands.CommandTree(bot)
 
@@ -25,13 +29,20 @@ async def on_ready():
         except Exception as e:
             await set_status(bot, f'failed to load {toe} toe!')
             raise e
-    
+
     #loads the global commands and the debug commands
     await tree.sync()
     await tree.sync(guild=DEBUG_GUILD)
 
     #notifies that the bot is ready
     await set_status(bot, 'with feet')
+
+@bot.event
+async def on_message(message: discord.Message):
+    # ignore messages sent by the bot (prevents potential infinite loops)
+    if message.author == bot.user:
+        return
+    await TriggerManager.process_message_all(message)
 
 
 def run():
