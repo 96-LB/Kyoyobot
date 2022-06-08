@@ -1,10 +1,9 @@
-from http import client
 import os, discord
 from importlib import import_module
 from util.bot import set_status
 from util.debug import DEBUG_GUILD
 from util.settings import Env
-from extras.triggers import Trigger, TriggerManager
+from extras.triggers import TriggerManager
 
 #set up the discord client
 intents = discord.Intents().default()

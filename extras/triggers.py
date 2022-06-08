@@ -1,7 +1,6 @@
-from ast import keyword
 from typing import Callable, Awaitable, List, Set, Dict
 from unicodedata import name
-from discord import Emoji, Message
+from discord import Message
 import random
 
 import discord
