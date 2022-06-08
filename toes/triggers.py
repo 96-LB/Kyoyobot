@@ -10,21 +10,31 @@ DEBUG = True
 class Trigger(Protocol):
     async def __call__(self, bot: Client, message: Message) -> None: ...
 
+
+def after_trigger(pretrigger: Trigger):
+    def wrapper(trigger: Trigger):
+        @wraps(trigger)
+        async def wrapped(bot: Client, message: Message):
+            await pretrigger(bot, message)
+            await trigger(bot, message)
+        return wrapped
+    return wrapper
+
 def if_keyword(keyword: str):
     def wrapper(trigger: Trigger):
         @wraps(trigger)
-        async def wrapped(bot: Client, message: Message, **kwargs: Any):
+        async def wrapped(bot: Client, message: Message):
             if keyword in message.content:
-                await trigger(bot, message, **kwargs)
+                await trigger(bot, message)
         return wrapped
     return wrapper
 
 def with_probability(probability: float):
     def wrapper(trigger: Trigger):
         @wraps(trigger)
-        async def wrapped(bot: Client, message: Message, **kwargs: Any):
+        async def wrapped(bot: Client, message: Message):
             if random.random() <= probability:
-                await trigger(bot, message, **kwargs)
+                await trigger(bot, message)
         return wrapped
     return wrapper
 
@@ -47,24 +57,15 @@ def trigger_reaction_standard(emoji: str) -> Trigger:
 class Trigger:
     '''Provides generic functionality for triggers.'''
 
-    def __init__(self, filter_handler: Callable[[Message], Awaitable[bool]], \
-        response_handler: Callable[[Client, Message], Awaitable[None]], probability: float) -> None:
+    def __init__(self, response_handler: Callable[[Client, Message], Awaitable[None]]) -> None:
         '''Creates a generic Trigger instance.'''
 
-        # Validate probability (must be in the range [0.0, 1.0])
-        if probability < 0.0 or probability > 1.0:
-            raise ValueError(f'Probability {probability} for trigger is invalid: must be in the range [0.0, 1.0].')
-
-        self._filter_handler = filter_handler
         self._response_handler = response_handler
-        self._probability = probability
 
     async def process_message(self, bot: Client, message: Message) -> None:
         '''Processes messages fed in from on_message() event.'''
 
-        if await self._filter_handler(message):
-            if random.random() <= self._probability:
-                await self._response_handler(bot, message)
+        await self._response_handler(bot, message)
 
 
 T = TypeVar('T', bound='KeywordTrigger')
@@ -75,13 +76,7 @@ class KeywordTrigger(Trigger):
     def __init__(self, keyword: str, response_handler: Callable[[Message], Awaitable[None]], probability: float):
         '''Creates a generic KeywordTrigger with the generic response_handler.'''
 
-        self.keyword = keyword
-
-        def generate_filter_handler():
-            async def _(message: Message):
-                return keyword in message.content
-            return _
-        super().__init__(generate_filter_handler(), response_handler, probability) 
+        super().__init__(if_keyword(keyword)(with_probability(probability)(response_handler))) 
 
     @classmethod
     def from_phrase_response(cls, keyword: str, phrase_response: str, probability: float) -> T: 
