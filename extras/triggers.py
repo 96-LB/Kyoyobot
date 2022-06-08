@@ -92,10 +92,7 @@ class TriggerManager:
         triggers: Dict = Config.get('triggers')
         keyword_phrase_response_triggers = triggers.get('keyword_phrase_response', [])
         for trigger_info in keyword_phrase_response_triggers:
-            keyword = trigger_info['keyword']
-            phrase_response = trigger_info['phrase_response']
-            probability = float(trigger_info['probability'])
-            TriggerManager.add_trigger(KeywordTrigger.from_phrase_response(keyword, phrase_response, probability))
+            TriggerManager.add_trigger(KeywordTrigger.from_phrase_response(**trigger_info))
 
     @classmethod
     def _load_keyword_reaction_response_triggers_from_config(cls):
@@ -104,11 +101,7 @@ class TriggerManager:
         triggers: Dict = Config.get('triggers')
         keyword_reaction_response_triggers = triggers.get('keyword_reaction_response', [])
         for trigger_info in keyword_reaction_response_triggers:
-            keyword = trigger_info['keyword']
-            emoji_name = trigger_info['emoji_name']
-            is_custom_emoji = bool(trigger_info['is_custom_emoji'])
-            probability = float(trigger_info['probability'])
-            TriggerManager.add_trigger(KeywordTrigger.from_reaction_response(keyword, emoji_name, is_custom_emoji, probability))
+            TriggerManager.add_trigger(KeywordTrigger.from_reaction_response(**trigger_info))
 
     @classmethod
     def add_trigger(cls, trigger: Trigger):
