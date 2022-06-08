@@ -38,64 +38,71 @@ def with_probability(probability: float):
         return wrapped
     return wrapper
 
-def trigger_send_response(response: str) -> Trigger:
-    async def trigger(bot: Client, message: Message) -> None:
-        await message.channel.send(response)
-    return trigger
+def action_send_response(response: str):
+    def wrapper(trigger: Trigger):
+        @wraps(trigger)
+        async def wrapped(bot: Client, message: Message) -> None:
+            await message.channel.send(response)
+        return wrapped
+    return wrapper
 
-def trigger_reaction_custom(emoji_id: int) -> Trigger:
-    async def trigger(bot: Client, message: Message) -> None:
-        await message.add_reaction(bot.get_emoji(emoji_id))
-    return trigger
+def action_react_custom(emoji_id: int):
+    def wrapper(trigger: Trigger):
+        @wraps(trigger)
+        async def wrapped(bot: Client, message: Message) -> None:
+            await message.add_reaction(bot.get_emoji(emoji_id))
+        return wrapped
+    return wrapper
     
-def trigger_reaction_standard(emoji: str) -> Trigger:
-    async def trigger(bot: Client, message: Message) -> None:
-        await message.add_reaction(emoji)
+def action_react_standard(emoji: str):
+    def wrapper(trigger: Trigger):
+        @wraps(trigger)
+        async def wrapped(bot: Client, message: Message) -> None:
+            await message.add_reaction(emoji)
+        return wrapped
+    return wrapper
+
+
+def trigger_response(*, keyword: str, probability: float, response: str, **kwargs: Any) -> Trigger:
+    @if_keyword(keyword)
+    @with_probability(probability)
+    @action_send_response(response)
+    async def trigger(bot: Client, message: Message): ...
     return trigger
 
-def trigger_null() -> Trigger:
-    async def trigger(bot: Client, message: Message) -> None:
-        pass
+def trigger_reaction_custom(*, keyword: str, probability: float, emoji_id: int, **kwargs: Any) -> Trigger:
+    @if_keyword(keyword)
+    @with_probability(probability)
+    @action_react_custom(emoji_id)
+    async def trigger(bot: Client, message: Message): ...
     return trigger
 
-
-class KeywordTrigger():
-    '''Specific type of Trigger that triggers when a keyword is present in a
-    message.'''
-
-    @classmethod
-    def from_phrase_response(cls, keyword: str, phrase_response: str, probability: float) -> Trigger:
-        '''Creates a simple KeywordTrigger that sends a message with the given phrase.'''
-
-        return if_keyword(keyword)(with_probability(probability)(trigger_send_response(phrase_response)))
-
-    @classmethod
-    def from_reaction_response(cls, keyword: str, emoji_name: str, is_custom_emoji: bool, probability: float) -> Trigger:
-        '''Creates a simple KeywordTrigger that reacts to the triggering message
-        with the given emoji.
-
-        :param str emoji: either a Unicode emoji or custom emoji name, depending
-            on parameter is_custom_emoji
-        '''
-
-        return if_keyword(keyword)(with_probability(probability)((lambda x, y: '') if is_custom_emoji else trigger_reaction_standard(emoji_name)))
-
+def trigger_reaction_standard(*, keyword: str, probability: float, emoji: str,  **kwargs: Any) -> Trigger:
+    @if_keyword(keyword)
+    @with_probability(probability)
+    @action_react_standard(emoji)
+    async def trigger(bot: Client, message: Message): ...
+    return trigger
 
 
 def setup(bot: Client, tree: slash.CommandTree) -> None:
     '''Sets up this bot module.'''
 
-    trigger: Trigger = trigger_null()
+    async def trigger(bot: Client, message: Message): ...
 
     trigger_config : Dict[str, str] = Config.get('triggers')
 
     keyword_phrase_response_triggers = trigger_config.get('keyword_phrase_response', [])
     for trigger_info in keyword_phrase_response_triggers:
-        trigger = after_trigger(trigger)(KeywordTrigger.from_phrase_response(**trigger_info))
+        trigger = after_trigger(trigger)(trigger_response(**trigger_info))
 
     keyword_reaction_response_triggers = trigger_config.get('keyword_reaction_response', [])
     for trigger_info in keyword_reaction_response_triggers:
-        trigger = after_trigger(trigger)(KeywordTrigger.from_reaction_response(**trigger_info))
+        trigger = after_trigger(trigger)(trigger_reaction_standard(**trigger_info))
+
+    keyword_reaction_response_custom_triggers = trigger_config.get('keyword_reaction_response_custom', [])
+    for trigger_info in keyword_reaction_response_custom_triggers:
+        trigger = after_trigger(trigger)(trigger_reaction_custom(**trigger_info))
 
     
     @bot.event

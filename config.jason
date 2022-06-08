@@ -21,26 +21,26 @@
         "keyword_phrase_response": [
             {
                 "keyword": "kyoyo",
-                "phrase_response": "I love feet 😍",
+                "response": "I love feet 😍",
                 "probability": 0.5
             },
             {
                 "keyword": "💀",
-                "phrase_response": "💀",
+                "response": "💀",
                 "probability": 0.5
             }
         ],
         "keyword_reaction_response": [
             {
                 "keyword": "💀",
-                "emoji_name": "💀",
-                "is_custom_emoji": false,
+                "emoji": "💀",
                 "probability": 1.0
-            },
+            }
+        ],
+        "keyword_reaction_response_custom": [
             {
                 "keyword": "grave",
-                "emoji_name": "gravestone",
-                "is_custom_emoji": true,
+                "emoji_id": 984167533777129502,
                 "probability": 1.0
             }
         ]
