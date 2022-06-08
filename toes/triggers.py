@@ -53,39 +53,24 @@ def trigger_reaction_standard(emoji: str) -> Trigger:
         await message.add_reaction(emoji)
     return trigger
 
-
-class Trigger:
-    '''Provides generic functionality for triggers.'''
-
-    def __init__(self, response_handler: Callable[[Client, Message], Awaitable[None]]) -> None:
-        '''Creates a generic Trigger instance.'''
-
-        self._response_handler = response_handler
-
-    async def process_message(self, bot: Client, message: Message) -> None:
-        '''Processes messages fed in from on_message() event.'''
-
-        await self._response_handler(bot, message)
+def trigger_null() -> Trigger:
+    async def trigger(bot: Client, message: Message) -> None:
+        pass
+    return trigger
 
 
-T = TypeVar('T', bound='KeywordTrigger')
-class KeywordTrigger(Trigger):
+class KeywordTrigger():
     '''Specific type of Trigger that triggers when a keyword is present in a
     message.'''
 
-    def __init__(self, keyword: str, response_handler: Callable[[Message], Awaitable[None]], probability: float):
-        '''Creates a generic KeywordTrigger with the generic response_handler.'''
-
-        super().__init__(if_keyword(keyword)(with_probability(probability)(response_handler))) 
-
     @classmethod
-    def from_phrase_response(cls, keyword: str, phrase_response: str, probability: float) -> T: 
+    def from_phrase_response(cls, keyword: str, phrase_response: str, probability: float) -> Trigger:
         '''Creates a simple KeywordTrigger that sends a message with the given phrase.'''
 
-        return cls(keyword, trigger_send_response(phrase_response), probability)
+        return if_keyword(keyword)(with_probability(probability)(trigger_send_response(phrase_response)))
 
     @classmethod
-    def from_reaction_response(cls, keyword: str, emoji_name: str, is_custom_emoji: bool, probability: float) -> T:
+    def from_reaction_response(cls, keyword: str, emoji_name: str, is_custom_emoji: bool, probability: float) -> Trigger:
         '''Creates a simple KeywordTrigger that reacts to the triggering message
         with the given emoji.
 
@@ -93,13 +78,12 @@ class KeywordTrigger(Trigger):
             on parameter is_custom_emoji
         '''
 
-
-        return cls(keyword, (lambda x, y: '') if is_custom_emoji else trigger_reaction_standard(emoji_name), probability)
+        return if_keyword(keyword)(with_probability(probability)((lambda x, y: '') if is_custom_emoji else trigger_reaction_standard(emoji_name)))
 
 class TriggerManager:
     '''Stores and manages all trigger instances.'''
 
-    _triggers: List[Trigger] = []
+    _triggers: Trigger = trigger_null()
 
     @classmethod
     def load_from_config(cls) -> None:
@@ -130,14 +114,13 @@ class TriggerManager:
     def add_trigger(cls, trigger: Trigger) -> None:
         '''Adds a trigger.'''
 
-        TriggerManager._triggers.append(trigger)
+        TriggerManager._triggers = after_trigger(TriggerManager._triggers)(trigger)
 
     @classmethod
     async def process_message_all(cls, bot: Client, message: Message) -> None:
         '''Processes all triggers.'''
 
-        for trigger in TriggerManager._triggers:
-            await trigger.process_message(bot, message)
+        await cls._triggers(bot, message)
 
 def setup(bot: Client, tree: slash.CommandTree) -> None:
     '''Sets up this bot module.'''
