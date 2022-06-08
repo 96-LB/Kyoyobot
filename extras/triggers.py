@@ -1,5 +1,4 @@
-from typing import Callable, Awaitable, List, Set, Dict
-from unicodedata import name
+from typing import Callable, Awaitable, List, Dict, TypeVar
 from discord import Message
 import random
 
@@ -11,7 +10,7 @@ class Trigger:
 
     def __init__(self, filter_handler: Callable[[Message], Awaitable[bool]], \
         response_handler: Callable[[Message], Awaitable[None]], probability: float) -> None:
-        '''Create a generic Trigger instance.'''
+        '''Creates a generic Trigger instance.'''
 
         # Validate probability (must be in the range [0.0, 1.0])
         if probability < 0.0 or probability > 1.0:
@@ -21,13 +20,15 @@ class Trigger:
         self._response_handler = response_handler
         self._probability = probability
 
-    async def process_message(self, message: Message):
+    async def process_message(self, message: Message) -> None:
         '''Processes messages fed in from on_message() event.'''
 
         if await self._filter_handler(message):
             if random.random() <= self._probability:
                 await self._response_handler(message)
 
+
+T = TypeVar('T', bound='KeywordTrigger')
 class KeywordTrigger(Trigger):
     '''Specific type of Trigger that triggers when a keyword is present in a
     message.'''
@@ -44,7 +45,7 @@ class KeywordTrigger(Trigger):
         super().__init__(generate_filter_handler(), response_handler, probability) 
 
     @classmethod
-    def from_phrase_response(cls, keyword: str, phrase_response: str, probability: float) -> 'KeywordTrigger': 
+    def from_phrase_response(cls, keyword: str, phrase_response: str, probability: float) -> T: 
         '''Creates a simple KeywordTrigger that sends a message with the given phrase.'''
 
         def generate_response_handler():
@@ -54,7 +55,7 @@ class KeywordTrigger(Trigger):
         return cls(keyword, generate_response_handler(), probability)
 
     @classmethod
-    def from_reaction_response(cls, keyword: str, emoji_name: str, is_custom_emoji: bool, probability: float) -> 'KeywordTrigger':
+    def from_reaction_response(cls, keyword: str, emoji_name: str, is_custom_emoji: bool, probability: float) -> T:
         '''Creates a simple KeywordTrigger that reacts to the triggering message
         with the given emoji.
 
@@ -78,14 +79,14 @@ class TriggerManager:
     _triggers: List[Trigger] = []
 
     @classmethod
-    def load_from_config(cls):
+    def load_from_config(cls) -> None:
         '''Loads all triggers from config.'''
 
         TriggerManager._load_keyword_phrase_response_triggers_from_config()
         TriggerManager._load_keyword_reaction_response_triggers_from_config()
 
     @classmethod
-    def _load_keyword_phrase_response_triggers_from_config(cls):
+    def _load_keyword_phrase_response_triggers_from_config(cls) -> None:
         '''Loads keyword_phrase_response triggers from config and adds them.'''
 
         triggers: Dict = Config.get('triggers')
@@ -94,7 +95,7 @@ class TriggerManager:
             TriggerManager.add_trigger(KeywordTrigger.from_phrase_response(**trigger_info))
 
     @classmethod
-    def _load_keyword_reaction_response_triggers_from_config(cls):
+    def _load_keyword_reaction_response_triggers_from_config(cls) -> None:
         '''Loads keyword_reaction_response triggers from config and adds them.'''
 
         triggers: Dict = Config.get('triggers')
@@ -103,13 +104,13 @@ class TriggerManager:
             TriggerManager.add_trigger(KeywordTrigger.from_reaction_response(**trigger_info))
 
     @classmethod
-    def add_trigger(cls, trigger: Trigger):
+    def add_trigger(cls, trigger: Trigger) -> None:
         '''Adds a trigger.'''
 
         TriggerManager._triggers.append(trigger)
 
     @classmethod
-    async def process_message_all(cls, message: Message):
+    async def process_message_all(cls, message: Message) -> None:
         '''Processes all triggers.'''
 
         for trigger in TriggerManager._triggers:

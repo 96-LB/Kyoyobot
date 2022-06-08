@@ -6,15 +6,15 @@ from util.settings import Config
 
 DEBUG = False
 
-def add_sticker_command(group: slash.Group, name: str, url: str, description: str=None):
+def add_sticker_command(group: slash.Group, name: str, url: str, description: str = ''):
     '''Generates a sticker commmand and adds it to the specified command group.'''
 
-    description = str(description) if description is not None else f'Posts the {name} sticker.'
+    description = str(description or f'Posts the {name} sticker.')
 
     #attempt to add the command and return whether it succeeded
     try:
         @group.command(name=name, description=description)
-        async def _(interaction: Interaction):
+        async def _(interaction: Interaction) -> None:
             await interaction.response.send_message(str(url))
             
         return True
@@ -24,7 +24,7 @@ def add_sticker_command(group: slash.Group, name: str, url: str, description: st
         
         return False
     
-def setup(tree):
+def setup(tree: slash.CommandTree) -> None:
     '''Sets up this command group.'''
 
     stickers = slash.Group(name='stickers', description='Posts stickers from a preset collection.')

@@ -1,20 +1,21 @@
 from flask import Flask
+from flask.typing import ResponseReturnType
 from threading import Thread
 
 app = Flask('Kyoyobot')
 
 @app.route('/')
-def route_index():
+def route_index() -> ResponseReturnType:
     '''Receives pings to keep the server running.'''
     
     return '🐛'
 
-def launch_server():
+def launch_server() -> None:
     '''Starts a server to receive pings that keep the application awake.'''
     
     app.run(host='0.0.0.0', port=8080)
 
-def run():
+def run() -> None:
     '''Runs this module.'''
 
     #imagine paying for server hosting 🐛
