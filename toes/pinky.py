@@ -1,4 +1,4 @@
-from discord import app_commands as slash, Interaction
+from discord import app_commands as slash, Interaction, Client
 from util.debug import DEBUG_GUILD
 
 DEBUG = False
@@ -9,7 +9,7 @@ async def ping(interaction: Interaction) -> None:
     
     await interaction.response.send_message('feet')
 
-def setup(tree: slash.CommandTree) -> None:
-    '''Sets up this command group.'''
+def setup(bot: Client, tree: slash.CommandTree) -> None:
+    '''Sets up this bot module.'''
 
     tree.add_command(ping, guild=(DEBUG_GUILD if DEBUG else None))

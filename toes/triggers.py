@@ -1,9 +1,10 @@
-from typing import Callable, Awaitable, List, Dict, TypeVar
-from discord import Message
 import random
-
-import discord
+from discord import app_commands as slash, Message, Client
+from typing import Callable, Awaitable, List, Dict, TypeVar
+from util.debug import DEBUG_GUILD
 from util.settings import Config
+
+DEBUG = True
 
 class Trigger:
     '''Provides generic functionality for triggers.'''
@@ -116,4 +117,13 @@ class TriggerManager:
         for trigger in TriggerManager._triggers:
             await trigger.process_message(message)
 
-TriggerManager.load_from_config()
+def setup(bot: Client, tree: slash.CommandTree) -> None:
+    '''Sets up this bot module.'''
+    
+    @bot.event
+    async def on_message(message: Message) -> None:
+        # ignore messages sent by the bot (prevents potential infinite loops)
+        if message.author == bot.user:
+            return
+        if not DEBUG or message.guild.id == DEBUG_GUILD.id: #todo: change this
+            await TriggerManager.process_message_all(message)
