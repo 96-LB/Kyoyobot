@@ -41,7 +41,8 @@ async def on_message(message: discord.Message):
     # ignore messages sent by the bot (prevents potential infinite loops)
     if message.author == bot.user:
         return
-    await TriggerManager.process_message_all(message)
+    if message.guild.id == DEBUG_GUILD.id: #todo: change this
+        await TriggerManager.process_message_all(message)
 
 
 def run():
