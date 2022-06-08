@@ -146,9 +146,8 @@ def setup(bot: Client, tree: slash.CommandTree) -> None:
 
     async def trigger(bot: Client, message: Message): ...
 
-    #pulls trigger information from the
+    #pulls trigger information from the configuration file
     for trigger_info in Config.get('triggers', []):
-        #determine the type of trigger to create
         trigger_type = trigger_info.get('type')
         trigger_factory = jason_trigger_types.get(trigger_type)
 
