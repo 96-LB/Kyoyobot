@@ -63,6 +63,17 @@ def action_react_standard(emoji: str):
     return wrapper
 
 
+### JASON TRIGGERS ###
+
+jason_trigger_types = {}
+
+def jason_trigger(name: str):
+    def wrapper(factory: Callable[..., Trigger]):
+        jason_trigger_types[name] = factory
+        return factory
+    return wrapper
+
+@jason_trigger('keyword_response')
 def trigger_response(*, keyword: str, probability: float, response: str, **kwargs: Any) -> Trigger:
     @if_keyword(keyword)
     @with_probability(probability)
@@ -70,13 +81,7 @@ def trigger_response(*, keyword: str, probability: float, response: str, **kwarg
     async def trigger(bot: Client, message: Message): ...
     return trigger
 
-def trigger_reaction_custom(*, keyword: str, probability: float, emoji_id: int, **kwargs: Any) -> Trigger:
-    @if_keyword(keyword)
-    @with_probability(probability)
-    @action_react_custom(emoji_id)
-    async def trigger(bot: Client, message: Message): ...
-    return trigger
-
+@jason_trigger('keyword_reaction_standard')
 def trigger_reaction_standard(*, keyword: str, probability: float, emoji: str,  **kwargs: Any) -> Trigger:
     @if_keyword(keyword)
     @with_probability(probability)
@@ -84,26 +89,28 @@ def trigger_reaction_standard(*, keyword: str, probability: float, emoji: str,  
     async def trigger(bot: Client, message: Message): ...
     return trigger
 
+@jason_trigger('keyword_reaction_custom')
+def trigger_reaction_custom(*, keyword: str, probability: float, emoji_id: int, **kwargs: Any) -> Trigger:
+    @if_keyword(keyword)
+    @with_probability(probability)
+    @action_react_custom(emoji_id)
+    async def trigger(bot: Client, message: Message): ...
+    return trigger
+
+### SETUP ###
 
 def setup(bot: Client, tree: slash.CommandTree) -> None:
     '''Sets up this bot module.'''
 
     async def trigger(bot: Client, message: Message): ...
 
-    trigger_config : Dict[str, str] = Config.get('triggers')
+    trigger_config : List[Dict[str, Any]] = Config.get('triggers', [])
 
-    keyword_phrase_response_triggers = trigger_config.get('keyword_phrase_response', [])
-    for trigger_info in keyword_phrase_response_triggers:
-        trigger = after_trigger(trigger)(trigger_response(**trigger_info))
-
-    keyword_reaction_response_triggers = trigger_config.get('keyword_reaction_response', [])
-    for trigger_info in keyword_reaction_response_triggers:
-        trigger = after_trigger(trigger)(trigger_reaction_standard(**trigger_info))
-
-    keyword_reaction_response_custom_triggers = trigger_config.get('keyword_reaction_response_custom', [])
-    for trigger_info in keyword_reaction_response_custom_triggers:
-        trigger = after_trigger(trigger)(trigger_reaction_custom(**trigger_info))
-
+    for trigger_info in trigger_config:
+        trigger_type = trigger_info.get('type')
+        trigger_factory = jason_trigger_types.get(trigger_type)
+        new_trigger = trigger_factory(**trigger_info)
+        trigger = after_trigger(trigger)(new_trigger)
     
     @bot.event
     async def on_message(message: Message) -> None:
