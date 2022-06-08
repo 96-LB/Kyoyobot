@@ -10,63 +10,56 @@ DEBUG = True
 class Trigger(Protocol):
     async def __call__(self, bot: Client, message: Message) -> None: ...
 
-def after_trigger(pretrigger: Trigger):
-    def wrapper(trigger: Trigger):
-        @wraps(trigger)
-        async def wrapped(bot: Client, message: Message):
-            try:
-                await pretrigger(bot, message)
-            except Exception as e:
-                error(e, f'Failed to execute trigger {pretrigger}')
-            try:
-                await trigger(bot, message)
-            except Exception as e:
-                error(e, f'Failed to execute trigger {trigger}!')
-        return wrapped
-    return wrapper
+def modifier(f):
+    @wraps(f)
+    def wrapped(*args, **kwargs):
+        def wrapper(trigger: Trigger):
+            @wraps(trigger)
+            async def wrapped2(bot: Client, message: Message):
+                await f(bot, message, trigger, *args, **kwargs)
+            return wrapped2
+        return wrapper
+    return wrapped
 
-def if_keyword(keyword: str):
-    def wrapper(trigger: Trigger):
-        @wraps(trigger)
-        async def wrapped(bot: Client, message: Message):
-            if keyword in message.content:
-                await trigger(bot, message)
-        return wrapped
-    return wrapper
+@modifier
+async def if_keyword(bot: Client, message: Message, trigger: Trigger, keyword: str):
+    if keyword in message.content:
+        await trigger(bot, message)
 
-def with_probability(probability: float):
-    def wrapper(trigger: Trigger):
-        @wraps(trigger)
-        async def wrapped(bot: Client, message: Message):
-            if random.random() <= probability:
-                await trigger(bot, message)
-        return wrapped
-    return wrapper
+@modifier
+async def with_probability(bot: Client, message: Message, trigger: Trigger, probability: float):
+    if random.random() <= probability:
+        await trigger(bot, message)
 
-def action_send_response(response: str):
-    def wrapper(trigger: Trigger):
-        @wraps(trigger)
-        async def wrapped(bot: Client, message: Message) -> None:
-            await message.channel.send(response)
-        return wrapped
-    return wrapper
+@modifier
+async def action_trigger(bot: Client, message: Message, trigger: Trigger, other: Trigger):
+    await other(bot, message)
+    await trigger(bot, message)
 
-def action_react_custom(emoji_id: int):
-    def wrapper(trigger: Trigger):
-        @wraps(trigger)
-        async def wrapped(bot: Client, message: Message) -> None:
-            await message.add_reaction(bot.get_emoji(emoji_id))
-        return wrapped
-    return wrapper
+@modifier
+async def action_send_response(bot: Client, message: Message, trigger: Trigger, response: str):
+    try:
+        await message.channel.send(response)
+    except Exception as e:
+        error(e, 'Triggers :: Failed to send message!')
+    await trigger(bot, message)
+
+@modifier
+async def action_react_custom(bot: Client, message: Message, trigger: Trigger, emoji_id: int):
+    try:
+        await message.add_reaction(bot.get_emoji(emoji_id))
+    except Exception as e:
+        error(e, 'Triggers :: Failed to add custom emoji reaction!')
+    await trigger(bot, message)
+
+@modifier
+async def action_react_standard(bot: Client, message: Message, trigger: Trigger, emoji: str):
+    try:
+        await message.add_reaction(emoji)
+    except Exception as e:
+        error(e, 'Triggers :: Failed to add standard emoji reaction!')
+    await trigger(bot, message)
     
-def action_react_standard(emoji: str):
-    def wrapper(trigger: Trigger):
-        @wraps(trigger)
-        async def wrapped(bot: Client, message: Message) -> None:
-            await message.add_reaction(emoji)
-        return wrapped
-    return wrapper
-
 
 ### JASON TRIGGERS ###
 
@@ -77,6 +70,8 @@ def jason_trigger(name: str):
         jason_trigger_types[name] = factory
         return factory
     return wrapper
+
+###
 
 @jason_trigger('keyword_response')
 def trigger_response(*, keyword: str, probability: float, response: str, **kwargs: Any) -> Trigger:
@@ -120,8 +115,9 @@ def setup(bot: Client, tree: slash.CommandTree) -> None:
         except TypeError as e:
             error(e, f'Failed to create sticker of type {trigger_type}!')
             continue
-            
-        trigger = after_trigger(trigger)(new_trigger)
+
+        #combines the triggers
+        trigger = action_trigger(trigger)(new_trigger)
     
     @bot.event
     async def on_message(message: Message) -> None:
