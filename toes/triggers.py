@@ -2,7 +2,7 @@ import random, discord
 from discord import app_commands as slash, Message, Client
 from functools import wraps
 from typing import Callable, Any, Awaitable, List, Dict, Protocol, TypeVar
-from util.debug import DEBUG_GUILD
+from util.debug import DEBUG_GUILD, error
 from util.settings import Config
 
 DEBUG = True
@@ -10,13 +10,18 @@ DEBUG = True
 class Trigger(Protocol):
     async def __call__(self, bot: Client, message: Message) -> None: ...
 
-
 def after_trigger(pretrigger: Trigger):
     def wrapper(trigger: Trigger):
         @wraps(trigger)
         async def wrapped(bot: Client, message: Message):
-            await pretrigger(bot, message)
-            await trigger(bot, message)
+            try:
+                await pretrigger(bot, message)
+            except Exception as e:
+                error(e, f'Failed to execute trigger {pretrigger}')
+            try:
+                await trigger(bot, message)
+            except Exception as e:
+                error(e, f'Failed to execute trigger {trigger}!')
         return wrapped
     return wrapper
 
@@ -109,7 +114,13 @@ def setup(bot: Client, tree: slash.CommandTree) -> None:
     for trigger_info in trigger_config:
         trigger_type = trigger_info.get('type')
         trigger_factory = jason_trigger_types.get(trigger_type)
-        new_trigger = trigger_factory(**trigger_info)
+        
+        try:
+            new_trigger = trigger_factory(**trigger_info)
+        except TypeError as e:
+            error(e, f'Failed to create sticker of type {trigger_type}!')
+            continue
+            
         trigger = after_trigger(trigger)(new_trigger)
     
     @bot.event
