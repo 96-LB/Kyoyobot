@@ -1,11 +1,11 @@
 from flask import Flask
-from flask.typing import ResponseReturnType
+from flask.typing import ResponseReturnValue
 from threading import Thread
 
 app = Flask('Kyoyobot')
 
 @app.route('/')
-def route_index() -> ResponseReturnType:
+def route_index() -> ResponseReturnValue:
     '''Receives pings to keep the server running.'''
     
     return '🐛'
