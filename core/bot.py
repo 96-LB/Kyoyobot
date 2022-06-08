@@ -1,7 +1,8 @@
 import os, discord
 from importlib import import_module
-from util.debug import DEBUG_GUILD
 from util.bot import set_status
+from util.debug import DEBUG_GUILD
+from util.settings import Env
 
 #set up the discord client
 intents = discord.Intents().default()
@@ -36,4 +37,4 @@ async def on_ready():
 def run():
     '''Runs this module.'''
     
-    bot.run(os.getenv('TOKEN'))
+    bot.run(Env.get('TOKEN'))

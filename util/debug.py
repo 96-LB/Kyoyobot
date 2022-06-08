@@ -1,3 +1,4 @@
-import os, discord
+import discord
+from util.settings import Env
 
-DEBUG_GUILD = discord.Object(id=os.getenv('DEBUG_GUILD', 0))
+DEBUG_GUILD = discord.Object(id=Env.get('DEBUG_GUILD', 0))
