@@ -19,40 +19,64 @@
 
     "triggers": [
         {
+            "type": "keyword_random_response",
+            "keyword": "\\?$",
+            "responses": [
+                "yeah",
+                "yes",
+                "ye",
+                "nah",
+                ".",
+                "?"
+            ],
+            "probability": 10
+        },
+        {
             "type": "keyword_response",
-            "keyword": "kyoyo",
+            "keyword": "",
             "response": "I love feet 😍",
-            "probability": 0.5
+            "probability": 0.1
         },
         {
             "type": "keyword_response",
             "keyword": "💀",
             "response": "💀",
-            "probability": 0.5
+            "probability": 10
         },
         {
             "type": "keyword_reaction_standard",
             "keyword": "💀",
             "emoji": "💀",
-            "probability": 1.0
+            "probability": 20
         },
         {
             "type": "keyword_reaction_custom",
-            "keyword": "grave",
-            "emoji_id": 984167533777129502,
-            "probability": 1.0
+            "keyword": "\\bbeelau\\b",
+            "emoji_id": 941354051059208222,
+            "probability": 20
         },
         {
-            "type": "reaction_trail_standard",
+            "type": "keyword_reaction_random",
+            "keyword": "\\b(slovak(ia(n)?)?|svk)\\b|🇸🇰",
+            "emojis": [
+                "🇸🇮",
+                "🇷🇸",
+                "🇨🇿",
+                "🇷🇺"
+            ],
+            "probability": 20
+        },
+        {
+            "type": "user_reaction_standard",
             "author_id": 757355879975747587,
             "emoji": "🦓",
-            "probability": 1.0
+            "probability": 2
         },
         {
-            "type": "reaction_trail_custom",
+            "type": "user_reaction_custom",
             "author_id": 285167387278442506,
             "emoji_id": 979140176318169108,
-            "probability": 1.0
+            "probability": 2
         }
     ]
 }
