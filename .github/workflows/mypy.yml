@@ -29,5 +29,6 @@ jobs:
         pip install poetry mypy
         poetry install
     - name: Lint with mypy
-      run: |
-        mypy
+      run: mypy
+      env:
+        MYPYPATH: /home/runner/.cache/pypoetry/virtualenvs
