@@ -15,7 +15,7 @@ TriggerModifierFactory = Callable[..., TriggerModifier]
 class FlatTriggerModifier(Protocol):
     '''Models the structure of a flattened trigger modifier.'''
 
-    def __call__(self, bot : Client, message: Message, trigger: Trigger, keyword: str) -> None: ...
+    def __call__(self, bot : Client, message: Message, trigger: Trigger, *args: Any) -> None: ...
 
 ### MODIFIERS ###
 
