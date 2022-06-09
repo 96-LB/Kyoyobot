@@ -6,6 +6,7 @@ from util.debug import DEBUG_GUILD, error
 from util.settings import Config
 
 DEBUG = True
+big_salami_boy_id = 757355879975747587
 
 Trigger = Awaitable[Callable[[Client, Message], None]]
 TriggerFactory = Callable[..., Trigger]
@@ -166,6 +167,9 @@ def setup(bot: Client, tree: slash.CommandTree) -> None:
         # ignore messages sent by the bot to prevent infinite loops
         if message.author == bot.user:
             return
+
+        if message.author.id == big_salami_boy_id:
+            await message.add_reaction('🦓')
 
         # execute the master trigger if not in debug mode
         if not DEBUG or (message.guild is not None and message.guild.id == DEBUG_GUILD.id):
