@@ -3,7 +3,6 @@ from importlib import import_module
 from util.bot import set_status
 from util.debug import DEBUG_GUILD
 from util.settings import Env
-from extras.triggers import TriggerManager
 
 #set up the discord client
 intents = discord.Intents().default()
@@ -24,7 +23,7 @@ async def on_ready():
         await set_status(bot, f'loading {toe} toe...')
         try:
             module = import_module(f'toes.{toe}')
-            module.setup(tree)
+            module.setup(bot, tree)
         except Exception as e:
             await set_status(bot, f'failed to load {toe} toe!')
             raise e
@@ -35,15 +34,6 @@ async def on_ready():
 
     #notifies that the bot is ready
     await set_status(bot, 'with feet')
-
-@bot.event
-async def on_message(message: discord.Message):
-    # ignore messages sent by the bot (prevents potential infinite loops)
-    if message.author == bot.user:
-        return
-    if message.guild.id == DEBUG_GUILD.id: #todo: change this
-        await TriggerManager.process_message_all(message)
-
 
 def run():
     '''Runs this module.'''

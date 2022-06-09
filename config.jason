@@ -17,32 +17,30 @@
         }
     ],
 
-    "triggers": {
-        "keyword_phrase_response": [
-            {
-                "keyword": "kyoyo",
-                "phrase_response": "I love feet 😍",
-                "probability": 0.5
-            },
-            {
-                "keyword": "💀",
-                "phrase_response": "💀",
-                "probability": 0.5
-            }
-        ],
-        "keyword_reaction_response": [
-            {
-                "keyword": "💀",
-                "emoji_name": "💀",
-                "is_custom_emoji": false,
-                "probability": 1.0
-            },
-            {
-                "keyword": "grave",
-                "emoji_name": "gravestone",
-                "is_custom_emoji": true,
-                "probability": 1.0
-            }
-        ]
-    }
+    "triggers": [
+        {
+            "type": "keyword_response",
+            "keyword": "kyoyo",
+            "response": "I love feet 😍",
+            "probability": 0.5
+        },
+        {
+            "type": "keyword_response",
+            "keyword": "💀",
+            "response": "💀",
+            "probability": 0.5
+        },
+        {
+            "type": "keyword_reaction_standard",
+            "keyword": "💀",
+            "emoji": "💀",
+            "probability": 1.0
+        },
+        {
+            "type": "keyword_reaction_custom",
+            "keyword": "grave",
+            "emoji_id": 984167533777129502,
+            "probability": 1.0
+        }
+    ]
 }

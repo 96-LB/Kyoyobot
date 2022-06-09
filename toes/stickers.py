@@ -1,4 +1,4 @@
-from discord import app_commands as slash, Interaction
+from discord import app_commands as slash, Interaction, Client
 from discord.errors import HTTPException
 from discord.app_commands.errors import CommandAlreadyRegistered
 from util.debug import DEBUG_GUILD, error
@@ -24,8 +24,8 @@ def add_sticker_command(group: slash.Group, name: str, url: str, description: st
         
         return False
     
-def setup(tree: slash.CommandTree) -> None:
-    '''Sets up this command group.'''
+def setup(bot: Client, tree: slash.CommandTree) -> None:
+    '''Sets up this bot module.'''
 
     stickers = slash.Group(name='stickers', description='Posts stickers from a preset collection.')
 

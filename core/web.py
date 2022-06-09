@@ -2,7 +2,7 @@ from flask import Flask
 from flask.typing import ResponseReturnValue
 from threading import Thread
 
-app = Flask('Kyoyobot')
+app: Flask = Flask('Kyoyobot')
 
 @app.route('/')
 def route_index() -> ResponseReturnValue:
