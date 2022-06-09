@@ -1,4 +1,4 @@
-import random
+import random, re
 from discord import app_commands as slash, Message, Client
 from functools import wraps
 from typing import Any, Awaitable, Callable, Coroutine
@@ -37,10 +37,10 @@ def modifier(func: Callable[..., Awaitable[None]]) -> TriggerModifierFactory:
 # to call them, do NOT use `await`, and omit the first three arguments 
 
 @modifier
-async def if_keyword(bot: Client, message: Message, trigger: Trigger, keyword: str) -> None:
+async def if_keyword(bot: Client, message: Message, trigger: Trigger, keyword: str, case_sensitive: bool = False) -> None:
     '''Executes the trigger only if the keyword is present in the message.'''
     
-    if keyword in message.content:
+    if re.search(keyword, message.content, re.IGNORECASE if not case_sensitive else 0):
         await trigger(bot, message)
 
 @modifier
@@ -54,7 +54,7 @@ async def if_author(bot: Client, message: Message, trigger: Trigger, author_id: 
 async def with_probability(bot: Client, message: Message, trigger: Trigger, probability: float) -> None:
     '''Executes the trigger with a random probability.'''
     
-    if random.random() <= probability:
+    if random.random() * 100 <= probability:
         await trigger(bot, message)
 
 @modifier
@@ -113,37 +113,37 @@ def jason_trigger(name: str) -> Callable[[TriggerFactory], TriggerFactory]:
 ###
 
 @jason_trigger('keyword_response')
-def _(*, keyword: str, probability: float = 1.0, response: str, **kwargs: Any) -> Trigger:
+def _(*, keyword: str, case_sensitive: bool = False, probability: float = 100, response: str, **kwargs: Any) -> Trigger:
     '''Triggers a text response upon detecting a keyword.'''
     
-    @if_keyword(keyword)
+    @if_keyword(keyword, case_sensitive)
     @with_probability(probability)
     @action_send_response(response)
     async def trigger(bot: Client, message: Message): ...
     return trigger
 
 @jason_trigger('keyword_reaction_standard')
-def _(*, keyword: str, probability: float = 1.0, emoji: str,  **kwargs: Any) -> Trigger:
+def _(*, keyword: str, case_sensitive: bool = False, probability: float = 100, emoji: str,  **kwargs: Any) -> Trigger:
     '''Triggers a standard emoji reaction upon detecting a keyword.'''
     
-    @if_keyword(keyword)
+    @if_keyword(keyword, case_sensitive)
     @with_probability(probability)
     @action_react_standard(emoji)
     async def trigger(bot: Client, message: Message): ...
     return trigger
 
 @jason_trigger('keyword_reaction_custom')
-def _(*, keyword: str, probability: float = 1.0, emoji_id: int, **kwargs: Any) -> Trigger:
+def _(*, keyword: str, case_sensitive: bool = False, probability: float = 100, emoji_id: int, **kwargs: Any) -> Trigger:
     '''Triggers a custom emoji reaction upon detecting a keyword.'''
     
-    @if_keyword(keyword)
+    @if_keyword(keyword, case_sensitive)
     @with_probability(probability)
     @action_react_custom(emoji_id)
     async def trigger(bot: Client, message: Message): ...
     return trigger
 
 @jason_trigger('user_reaction_standard')
-def _(*, author_id: int, probability: float = 1.0, emoji: str,  **kwargs: Any) -> Trigger:
+def _(*, author_id: int, probability: float = 100, emoji: str,  **kwargs: Any) -> Trigger:
     '''Triggers a custom emoji reaction upon detecting an author.'''
    
     @if_author(author_id)
@@ -153,7 +153,7 @@ def _(*, author_id: int, probability: float = 1.0, emoji: str,  **kwargs: Any) -
     return trigger
  
 @jason_trigger('user_reaction_custom')
-def _(*, author_id: int, probability: float = 1.0, emoji_id: int, **kwargs: Any) -> Trigger:
+def _(*, author_id: int, probability: float = 100, emoji_id: int, **kwargs: Any) -> Trigger:
     '''Triggers a custom emoji reaction upon detecting an author.'''
    
     @if_author(author_id)
