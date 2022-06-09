@@ -27,8 +27,9 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install poetry mypy
+        poetry config settings.virtualenvs.in-project true
         poetry install
     - name: Lint with mypy
       run: mypy
       env:
-        MYPYPATH: /home/runner/.cache/pypoetry/virtualenvs
+        MYPYPATH: venv
