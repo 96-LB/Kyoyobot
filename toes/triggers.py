@@ -44,6 +44,13 @@ async def if_keyword(bot: Client, message: Message, trigger: Trigger, keyword: s
         await trigger(bot, message)
 
 @modifier
+async def if_author(bot: Client, message: Message, trigger: Trigger, author_id: str) -> None:
+    '''Executes the trigger only if the message author is present in the database'''
+   
+    if int(author_id) == message.author.id:
+        await trigger(bot, message)
+
+@modifier
 async def with_probability(bot: Client, message: Message, trigger: Trigger, probability: float) -> None:
     '''Executes the trigger with a random probability.'''
     
@@ -129,6 +136,26 @@ def trigger_reaction_custom(*, keyword: str, probability: float = 1.0, emoji_id:
     '''Triggers a custom emoji reaction upon detecting a keyword.'''
     
     @if_keyword(keyword)
+    @with_probability(probability)
+    @action_react_custom(emoji_id)
+    async def trigger(bot: Client, message: Message): ...
+    return trigger
+
+@jason_trigger('reaction_trail_standard')
+def trigger_reaction_standard(*, author_id: str, probability: float = 1.0, emoji: str,  **kwargs: Any) -> Trigger:
+    '''Triggers a custom emoji reaction upon detecting an author.'''
+   
+    @if_author(author_id)
+    @with_probability(probability)
+    @action_react_standard(emoji)
+    async def trigger(bot: Client, message: Message): ...
+    return trigger
+ 
+@jason_trigger('reaction_trail_custom')
+def trigger_reaction_custom(*, author_id: str, probability: float = 1.0, emoji_id: int, **kwargs: Any) -> Trigger:
+    '''Triggers a custom emoji reaction upon detecting an author.'''
+   
+    @if_author(author_id)
     @with_probability(probability)
     @action_react_custom(emoji_id)
     async def trigger(bot: Client, message: Message): ...
