@@ -1,25 +1,20 @@
 import random
 from discord import app_commands as slash, Message, Client
 from functools import wraps
-from typing import Any, Awaitable, Callable, Protocol
+from typing import Any, Awaitable, Callable, Coroutine
 from util.debug import DEBUG_GUILD, error
 from util.settings import Config
 
 DEBUG = True
 
-Trigger = Awaitable[Callable[[Client, Message], None]]
+Trigger = Callable[[Client, Message], Coroutine[Any, Any, None]]
 TriggerFactory = Callable[..., Trigger]
 TriggerModifier = Callable[[Trigger], Trigger]
 TriggerModifierFactory = Callable[..., TriggerModifier]
 
-class FlatTriggerModifier(Protocol):
-    '''Models the structure of a flattened trigger modifier.'''
-
-    def __call__(self, bot : Client, message: Message, trigger: Trigger, *args: Any) -> None: ...
-
 ### MODIFIERS ###
 
-def modifier(func: FlatTriggerModifier) -> TriggerModifierFactory:
+def modifier(func: Callable[..., Awaitable[None]]) -> TriggerModifierFactory:
     '''Converts a flat trigger modifier into a compositable decorator factory.'''
     
     @wraps(func)
@@ -30,7 +25,7 @@ def modifier(func: FlatTriggerModifier) -> TriggerModifierFactory:
             @wraps(trigger)
             async def wrapper(bot: Client, message: Message) -> None:
                 #a wrapper which passes in the environment to the original function
-                await func(bot, message, trigger, *args, **kwargs)
+                await func(bot, message, trigger, *args)
             return wrapper
         return decorator
     return decorator_wrapper
@@ -144,16 +139,23 @@ def trigger_reaction_custom(*, keyword: str, probability: float = 1.0, emoji_id:
 def setup(bot: Client, tree: slash.CommandTree) -> None:
     '''Sets up this bot module.'''
 
-    async def trigger(bot: Client, message: Message): ...
+    async def trigger(__bot: Client, __message: Message) -> None: ...
 
     # pulls trigger information from the configuration file
-    for trigger_info in Config.get('triggers', []):
+
+    try:
+        trigger_config = list(Config.get('triggers')) # type: ignore
+    except ValueError as e:
+        error(e, 'Triggers :: Failed to load trigger configuration!')
+        trigger_config = []
+
+    for trigger_info in trigger_config:
         trigger_type = trigger_info.get('type')
         trigger_factory = jason_trigger_types.get(trigger_type)
 
         # attempt to create the trigger with the appropriate factory method
         try:
-            new_trigger = trigger_factory(**trigger_info)
+            new_trigger = trigger_factory(**trigger_info) # type: ignore
         except TypeError as e:
             error(e, f'Triggers :: Failed to create trigger of type {trigger_type}!')
             continue

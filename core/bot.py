@@ -1,7 +1,7 @@
 import discord, os
 from importlib import import_module
-from util.bot import set_status
-from util.debug import DEBUG_GUILD
+from typing import Any, cast
+from util.debug import DEBUG_GUILD, set_status
 from util.settings import Env
 
 # set up the discord client
@@ -12,7 +12,7 @@ bot = discord.Client(intents=intents)
 tree = discord.app_commands.CommandTree(bot)
 
 @bot.event
-async def on_ready():
+async def on_ready() -> None:
     '''Initializes the bot.'''
 
     await set_status(bot, 'loading toes...')
@@ -23,7 +23,7 @@ async def on_ready():
         await set_status(bot, f'loading {toe} toe...')
         try:
             module = import_module(f'toes.{toe}')
-            module.setup(bot, tree)
+            cast(Any, module).setup(bot, tree)
         except Exception as e:
             await set_status(bot, f'failed to load {toe} toe!')
             raise e
@@ -35,7 +35,7 @@ async def on_ready():
     # notifies that the bot is ready
     await set_status(bot, 'with feet')
 
-def run():
+def run() -> None:
     '''Runs this module.'''
     
     bot.run(Env.get('TOKEN'))

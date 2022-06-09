@@ -26,7 +26,12 @@ def setup(bot: Client, tree: slash.CommandTree) -> None:
     stickers = slash.Group(name='stickers', description='Posts stickers from a preset collection.')
 
     # load each sticker command from the configuration file
-    sticker_configs = Config.get('stickers', [])
+    try:
+        sticker_configs = list(Config.get('stickers')) # type: ignore
+    except ValueError as e:
+        error(e, 'Stickers :: Failed to load sticker configuration!')
+        sticker_configs = []
+    
     for sticker_config in sticker_configs:
         name = sticker_config.get('name')
         url = sticker_config.get('url')

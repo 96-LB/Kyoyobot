@@ -1,6 +1,6 @@
 import os, json
 from abc import ABC, abstractmethod
-from typing import Any, Dict, TextIO
+from typing import Any, Dict, TextIO, cast
 from util.debug import error
 
 class Settings(ABC):
@@ -9,16 +9,17 @@ class Settings(ABC):
     _data: Dict[str, Any] = {}
     
     @property
+    @classmethod
     @abstractmethod
     def SETTINGS_FILE(self) -> str: ...
-
+    
     @classmethod
     @abstractmethod
     def load(cls) -> None:
         '''Initializes the configuration data from the default file.'''
 
         try:
-            with open(cls.SETTINGS_FILE, 'r') as file:
+            with open(cast(str, cls.SETTINGS_FILE), 'r') as file:
                 cls.load_file(file)
         except FileNotFoundError:
             cls._data = {}
@@ -29,13 +30,13 @@ class Settings(ABC):
         '''Initializes the configuration data from the specified file.'''
 
     @classmethod
-    def get(cls, setting: str, default: str = None) -> object:
+    def get(cls, setting: str, default: object = None) -> object:
         '''Returns the value of the specified setting or the provided default.'''
         
         return cls._data.get(setting, default)
 
 
-    def __class_getitem__(cls, setting: str) -> str:
+    def __class_getitem__(cls, setting: str) -> object:
         '''Returns the value of the specified setting.'''
 
         # throws on failure
@@ -87,7 +88,7 @@ class Env(Settings):
                 pass
         
     @classmethod
-    def get(cls, setting: str, default: str = None) -> str:
+    def get(cls, setting: str, default: object = None) -> str:
         '''Returns the value of the specified setting or the provided default.'''
 
         # defaults to os environment variables with the loaded data as fallback
