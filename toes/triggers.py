@@ -45,9 +45,9 @@ async def if_keyword(bot: Client, message: Message, trigger: Trigger, keyword: s
 
 @modifier
 async def if_author(bot: Client, message: Message, trigger: Trigger, author_id: int) -> None:
-    '''Executes the trigger only if the message author is present in the database'''
+    '''Executes the trigger only if the provided ID matches the message author.'''
    
-    if author_id == message.author.id:
+    if message.author.id == author_id:
         await trigger(bot, message)
 
 @modifier
@@ -106,13 +106,14 @@ def jason_trigger(name: str) -> Callable[[TriggerFactory], TriggerFactory]:
     
     def wrapper(factory: TriggerFactory) -> TriggerFactory:
         jason_trigger_types[name] = factory
+        factory.__name__ = f'trigger_{name}'
         return factory
     return wrapper
 
 ###
 
 @jason_trigger('keyword_response')
-def trigger_response(*, keyword: str, probability: float = 1.0, response: str, **kwargs: Any) -> Trigger:
+def _(*, keyword: str, probability: float = 1.0, response: str, **kwargs: Any) -> Trigger:
     '''Triggers a text response upon detecting a keyword.'''
     
     @if_keyword(keyword)
@@ -122,7 +123,7 @@ def trigger_response(*, keyword: str, probability: float = 1.0, response: str, *
     return trigger
 
 @jason_trigger('keyword_reaction_standard')
-def trigger_reaction_standard(*, keyword: str, probability: float = 1.0, emoji: str,  **kwargs: Any) -> Trigger:
+def _(*, keyword: str, probability: float = 1.0, emoji: str,  **kwargs: Any) -> Trigger:
     '''Triggers a standard emoji reaction upon detecting a keyword.'''
     
     @if_keyword(keyword)
@@ -132,7 +133,7 @@ def trigger_reaction_standard(*, keyword: str, probability: float = 1.0, emoji: 
     return trigger
 
 @jason_trigger('keyword_reaction_custom')
-def trigger_reaction_custom(*, keyword: str, probability: float = 1.0, emoji_id: int, **kwargs: Any) -> Trigger:
+def _(*, keyword: str, probability: float = 1.0, emoji_id: int, **kwargs: Any) -> Trigger:
     '''Triggers a custom emoji reaction upon detecting a keyword.'''
     
     @if_keyword(keyword)
@@ -141,8 +142,8 @@ def trigger_reaction_custom(*, keyword: str, probability: float = 1.0, emoji_id:
     async def trigger(bot: Client, message: Message): ...
     return trigger
 
-@jason_trigger('reaction_trail_standard')
-def trigger_trail_standard(*, author_id: int, probability: float = 1.0, emoji: str,  **kwargs: Any) -> Trigger:
+@jason_trigger('user_reaction_standard')
+def _(*, author_id: int, probability: float = 1.0, emoji: str,  **kwargs: Any) -> Trigger:
     '''Triggers a custom emoji reaction upon detecting an author.'''
    
     @if_author(author_id)
@@ -151,8 +152,8 @@ def trigger_trail_standard(*, author_id: int, probability: float = 1.0, emoji: s
     async def trigger(bot: Client, message: Message): ...
     return trigger
  
-@jason_trigger('reaction_trail_custom')
-def trigger_trail_custom(*, author_id: int, probability: float = 1.0, emoji_id: int, **kwargs: Any) -> Trigger:
+@jason_trigger('user_reaction_custom')
+def _(*, author_id: int, probability: float = 1.0, emoji_id: int, **kwargs: Any) -> Trigger:
     '''Triggers a custom emoji reaction upon detecting an author.'''
    
     @if_author(author_id)
