@@ -29,9 +29,6 @@ jobs:
         pip install poetry mypy
         poetry config virtualenvs.in-project true
         poetry install
-    - name: Debug!
-      run: |
-        ls /home/runner/work/Kyoyobot/Kyoyobot/.venv/lib/python3.8/site-packages
     - name: Lint with mypy
       run: mypy
       env:
