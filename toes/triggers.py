@@ -1,7 +1,7 @@
 import random, re
 from discord import app_commands as slash, Message, Client
 from functools import wraps
-from typing import Any, Awaitable, Callable, Coroutine
+from typing import Any, Awaitable, Callable, Coroutine, Sequence
 from util.debug import DEBUG_GUILD, error
 from util.settings import Config
 
@@ -97,6 +97,21 @@ async def action_react_custom(bot: Client, message: Message, trigger: Trigger, e
     
     await trigger(bot, message)
 
+###
+
+@modifier
+async def pick_random(bot: Client, message: Message, trigger: Trigger, factory: TriggerModifierFactory, args: Sequence):
+    '''Applies a random argument from the list to the provided modifier factory.'''
+
+    try:
+        modifier : TriggerModifier = factory(random.choice(args))
+        modified : Trigger = modifier(trigger)
+    except Exception as e:
+        error(e, f'Triggers :: Failed to execute random trigger {factory}!')
+        return
+
+    await modified(bot, message)
+    
 ### JASON TRIGGERS ###
 
 jason_trigger_types = {}
@@ -119,6 +134,16 @@ def _(*, keyword: str, case_sensitive: bool = False, probability: float = 100, r
     @if_keyword(keyword, case_sensitive)
     @with_probability(probability)
     @action_send_response(response)
+    async def trigger(bot: Client, message: Message): ...
+    return trigger
+
+@jason_trigger('keyword_random_response')
+def _(*, keyword: str, case_sensitive: bool = False, probability: float = 100, responses: Sequence[str], **kwargs: Any) -> Trigger:
+    '''Triggers a random text response upon detecting a keyword.'''
+    
+    @if_keyword(keyword, case_sensitive)
+    @with_probability(probability)
+    @pick_random(action_send_response, responses)
     async def trigger(bot: Client, message: Message): ...
     return trigger
 
