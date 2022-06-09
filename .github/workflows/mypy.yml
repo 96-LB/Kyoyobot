@@ -31,8 +31,8 @@ jobs:
         poetry install
     - name: Debug!
       run: |
-        ls /home/runner/work/Kyoyobot/Kyoyobot/.venv/
+        ls /home/runner/work/Kyoyobot/Kyoyobot/.venv/lib
     - name: Lint with mypy
       run: mypy
       env:
-        MYPYPATH: /home/runner/work/Kyoyobot/Kyoyobot/.venv/kyoyobot
+        MYPYPATH: /home/runner/work/Kyoyobot/Kyoyobot/.venv/kyoyobot/lib/site-packages
