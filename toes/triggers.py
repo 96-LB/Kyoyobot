@@ -5,7 +5,7 @@ from typing import Any, Awaitable, Callable, Coroutine, Sequence
 from util.debug import DEBUG_GUILD, error
 from util.settings import Config
 
-DEBUG = True
+DEBUG = False
 
 Trigger = Callable[[Client, Message], Coroutine[Any, Any, None]]
 TriggerFactory = Callable[..., Trigger]
