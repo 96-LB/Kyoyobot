@@ -1,4 +1,4 @@
-from discord import app_commands as slash, Interaction, Client
+from discord import app_commands as slash, Client, Interaction
 from util.debug import DEBUG_GUILD
 
 DEBUG = False

@@ -146,27 +146,27 @@ def setup(bot: Client, tree: slash.CommandTree) -> None:
 
     async def trigger(bot: Client, message: Message): ...
 
-    #pulls trigger information from the configuration file
+    # pulls trigger information from the configuration file
     for trigger_info in Config.get('triggers', []):
         trigger_type = trigger_info.get('type')
         trigger_factory = jason_trigger_types.get(trigger_type)
 
-        #attempt to create the trigger with the appropriate factory method
+        # attempt to create the trigger with the appropriate factory method
         try:
             new_trigger = trigger_factory(**trigger_info)
         except TypeError as e:
-            error(e, f'Failed to create sticker of type {trigger_type}!')
+            error(e, f'Triggers :: Failed to create trigger of type {trigger_type}!')
             continue
 
-        #combines the triggers
+        # combines the triggers
         trigger = action_trigger(trigger)(new_trigger)
     
     @bot.event
     async def on_message(message: Message) -> None:
-        #ignore messages sent by the bot to prevent infinite loops
+        # ignore messages sent by the bot to prevent infinite loops
         if message.author == bot.user:
             return
 
-        #execute the master trigger if not in debug mode
+        # execute the master trigger if not in debug mode
         if not DEBUG or (message.guild is not None and message.guild.id == DEBUG_GUILD.id):
             await trigger(bot, message)

@@ -18,6 +18,6 @@ def launch_server() -> None:
 def run() -> None:
     '''Runs this module.'''
 
-    #imagine paying for server hosting 🐛
+    # imagine paying for server hosting 🐛
     server = Thread(target=launch_server)
     server.start()

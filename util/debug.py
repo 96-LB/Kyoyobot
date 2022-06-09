@@ -5,12 +5,11 @@ def error(e: Exception, msg: str = None) -> None:
     
     print('===ERROR!===')
     if msg is not None:
-        print(msg)
-    print(repr(e))
+        print(f'ǁ {msg}')
+    print(f'ǁ {repr(e)}')
     print('============')
 
-
-#moved to prevent circular import
+# moved to prevent circular import
 from util.settings import Env
 
 DEBUG_GUILD: discord.Object = discord.Object(id=Env.get('DEBUG_GUILD', 0))

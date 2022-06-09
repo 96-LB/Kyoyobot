@@ -38,7 +38,7 @@ class Settings(ABC):
     def __class_getitem__(cls, setting: str) -> str:
         '''Returns the value of the specified setting.'''
 
-        #throws on failure
+        # throws on failure
         value = cls.get(setting)
         if value is None:
             raise KeyError(setting)
@@ -57,7 +57,7 @@ class Config(Settings):
 
         cls._data = {}
         
-        #attempts to load as a json object
+        # attempts to load as a json object
         try:
             obj = json.loads(file.read())
             if isinstance(obj, dict):
@@ -78,7 +78,7 @@ class Env(Settings):
         
         cls._data = {}
         
-        #attempts to parse each line in key=value format
+        # attempts to parse each line in key=value format
         for line in file.readlines():
             try:
                 key, value = line.split('=', 1)
@@ -90,7 +90,7 @@ class Env(Settings):
     def get(cls, setting: str, default: str = None) -> str:
         '''Returns the value of the specified setting or the provided default.'''
 
-        #defaults to os environment variables with the loaded data as fallback
+        # defaults to os environment variables with the loaded data as fallback
         return os.getenv(setting, cls._data.get(setting, default))
 
 
