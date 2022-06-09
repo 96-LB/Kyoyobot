@@ -167,6 +167,16 @@ def _(*, keyword: str, case_sensitive: bool = False, probability: float = 100, e
     async def trigger(bot: Client, message: Message): ...
     return trigger
 
+@jason_trigger('keyword_reaction_random')
+def _(*, keyword: str, case_sensitive: bool = False, probability: float = 100, emojis: Sequence[str],  **kwargs: Any) -> Trigger:
+    '''Triggers a standard emoji reaction upon detecting a keyword.'''
+    
+    @if_keyword(keyword, case_sensitive)
+    @with_probability(probability)
+    @pick_random(action_react_standard, emojis)
+    async def trigger(bot: Client, message: Message): ...
+    return trigger
+
 @jason_trigger('user_response')
 def _(*, author_id: int, probability: float = 100, response: str,  **kwargs: Any) -> Trigger:
     '''Triggers a text response upon detecting an author.'''
@@ -231,7 +241,7 @@ def setup(bot: Client, tree: slash.CommandTree) -> None:
         # ignore messages sent by the bot to prevent infinite loops
         if message.author == bot.user:
             return
-
+        
         # execute the master trigger if not in debug mode
         if not DEBUG or (message.guild is not None and message.guild.id == DEBUG_GUILD.id):
             await trigger(bot, message)
