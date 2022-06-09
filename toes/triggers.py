@@ -144,7 +144,7 @@ def _(*, keyword: str, case_sensitive: bool = False, probability: float = 100, e
 
 @jason_trigger('user_response')
 def _(*, author_id: int, probability: float = 100, response: str,  **kwargs: Any) -> Trigger:
-    '''Triggers a custom emoji reaction upon detecting an author.'''
+    '''Triggers a text response upon detecting an author.'''
    
     @if_author(author_id)
     @with_probability(probability)
