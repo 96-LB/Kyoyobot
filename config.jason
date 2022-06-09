@@ -41,6 +41,18 @@
             "keyword": "grave",
             "emoji_id": 984167533777129502,
             "probability": 1.0
+        },
+        {
+            "type": "reaction_trail_standard",
+            "author_id": 757355879975747587,
+            "emoji": "🦓",
+            "probability": 1.0
+        },
+        {
+            "type": "reaction_trail_custom",
+            "author_id": 285167387278442506,
+            "emoji_id": 979140176318169108,
+            "probability": 1.0
         }
     ]
 }
