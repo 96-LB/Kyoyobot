@@ -42,6 +42,8 @@ def run() -> None:
     try:
         bot.run(Env.get('TOKEN'))
     except HTTPException as e:
-        error(e, 'Failed to start bot! Restarting...')
-        subprocess.run(['kill', '1'])
-        
+        if Env.get('HOST') == 'R':
+            error(e, 'Failed to start bot! Restarting...')
+            subprocess.run(['kill', '1'])
+        else:
+            raise

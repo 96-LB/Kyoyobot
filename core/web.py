@@ -1,6 +1,7 @@
 from flask import Flask
 from flask.typing import ResponseReturnValue
 from threading import Thread
+from util.settings import Env
 
 app: Flask = Flask('Kyoyobot')
 
@@ -17,7 +18,8 @@ def launch_server() -> None:
 
 def run() -> None:
     '''Runs this module.'''
-
+ 
     # imagine paying for server hosting 🐛
-    server = Thread(target=launch_server)
-    server.start()
+    if Env.get('HOST') == 'R':
+        server = Thread(target=launch_server)
+        server.start()
