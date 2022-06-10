@@ -1,8 +1,8 @@
 import random, re
-from discord import app_commands as slash, Message, Client
+from discord import app_commands as slash, Client, Message
 from functools import wraps
-from typing import Any, Awaitable, Callable, Coroutine, Sequence
-from util.debug import DEBUG_GUILD, error
+from typing import Any, Awaitable, Callable, Coroutine, Optional, Sequence
+from util.debug import DEBUG_GUILD, catch
 from util.settings import Config
 
 DEBUG = False
@@ -68,10 +68,8 @@ async def action_trigger(bot: Client, message: Message, trigger: Trigger, other:
 async def action_send_response(bot: Client, message: Message, trigger: Trigger, response: str) -> None:
     '''Sends a text response in the channel in which the message was received.'''
     
-    try:
+    with catch(Exception, 'Triggers :: Failed to send message!'):
         await message.channel.send(response)
-    except Exception as e:
-        error(e, 'Triggers :: Failed to send message!')
     
     await trigger(bot, message)
 
@@ -79,10 +77,8 @@ async def action_send_response(bot: Client, message: Message, trigger: Trigger, 
 async def action_react_standard(bot: Client, message: Message, trigger: Trigger, emoji: str) -> None:
     '''Reacts to the message with a standard emoji.'''
     
-    try:
+    with catch(Exception, 'Triggers :: Failed to add standard emoji reaction!'):
         await message.add_reaction(emoji)
-    except Exception as e:
-        error(e, 'Triggers :: Failed to add standard emoji reaction!')
     
     await trigger(bot, message)
 
@@ -90,10 +86,8 @@ async def action_react_standard(bot: Client, message: Message, trigger: Trigger,
 async def action_react_custom(bot: Client, message: Message, trigger: Trigger, emoji_id: int) -> None:
     '''Reacts to the message with a custom emoji.'''
     
-    try:
+    with catch(Exception, 'Triggers :: Failed to add custom emoji reaction!'):
         await message.add_reaction(bot.get_emoji(emoji_id))
-    except Exception as e:
-        error(e, 'Triggers :: Failed to add custom emoji reaction!')
     
     await trigger(bot, message)
 
@@ -103,12 +97,11 @@ async def action_react_custom(bot: Client, message: Message, trigger: Trigger, e
 async def pick_random(bot: Client, message: Message, trigger: Trigger, factory: TriggerModifierFactory, args: Sequence):
     '''Applies a random argument from the list to the provided modifier factory.'''
 
-    try:
+    async def modified(bot: Client, message: Message) -> None: ...
+    
+    with catch(Exception, f'Triggers :: Failed to execute random trigger {factory}!'):
         modifier : TriggerModifier = factory(random.choice(args))
         modified : Trigger = modifier(trigger)
-    except Exception as e:
-        error(e, f'Triggers :: Failed to execute random trigger {factory}!')
-        return
 
     await modified(bot, message)
     
@@ -215,26 +208,22 @@ def setup(bot: Client, tree: slash.CommandTree) -> None:
     async def trigger(__bot: Client, __message: Message) -> None: ...
 
     # pulls trigger information from the configuration file
-
-    try:
+    trigger_config = []
+    with catch(TypeError, 'Triggers :: Failed to load trigger configuration!'):
         trigger_config = list(Config.get('triggers')) # type: ignore
-    except ValueError as e:
-        error(e, 'Triggers :: Failed to load trigger configuration!')
-        trigger_config = []
 
     for trigger_info in trigger_config:
         trigger_type = trigger_info.get('type')
         trigger_factory = jason_trigger_types.get(trigger_type)
-
+        
         # attempt to create the trigger with the appropriate factory method
-        try:
+        new_trigger : Optional[Trigger] = None
+        with catch(TypeError, f'Triggers :: Failed to create trigger of type {trigger_type}!'):
             new_trigger = trigger_factory(**trigger_info) # type: ignore
-        except TypeError as e:
-            error(e, f'Triggers :: Failed to create trigger of type {trigger_type}!')
-            continue
-
+        
         # combines the triggers
-        trigger = action_trigger(trigger)(new_trigger)
+        if new_trigger:
+            trigger = action_trigger(trigger)(new_trigger)
     
     @bot.event
     async def on_message(message: Message) -> None:

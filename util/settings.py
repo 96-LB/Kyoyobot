@@ -1,7 +1,7 @@
 import os, json
 from abc import ABC, abstractmethod
 from typing import Any, Dict, TextIO, cast
-from util.debug import error
+from util.debug import catch
 
 class Settings(ABC):
     '''Handles configuration data.'''
@@ -59,12 +59,10 @@ class Config(Settings):
         cls._data = {}
         
         # attempts to load as a json object
-        try:
+        with catch(json.decoder.JSONDecodeError, 'Settings :: Failed to load configuration data!'):
             obj = json.loads(file.read())
             if isinstance(obj, dict):
                 cls._data = obj
-        except json.decoder.JSONDecodeError as e:
-            error(e, 'Failed to load configuration data!')
 
 
 
@@ -81,11 +79,9 @@ class Env(Settings):
         
         # attempts to parse each line in key=value format
         for line in file.readlines():
-            try:
+            with catch(ValueError, f'Settings :: Failed to parse line "{line}"'):
                 key, value = line.split('=', 1)
                 cls._data[key] = value.rstrip('\r\n')
-            except ValueError:
-                pass
         
     @classmethod
     def get(cls, setting: str, default: object = None) -> str:
