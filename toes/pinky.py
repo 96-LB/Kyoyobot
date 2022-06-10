@@ -47,7 +47,7 @@ async def ask(interaction: Interaction, question: str) -> None:
         f'A: **{random.choice(responses)}**'
     )
 
-    await interaction.channel.send(text)
+    await interaction.response.send_message(text)
 
 def setup(bot: Client, tree: slash.CommandTree) -> None:
     '''Sets up this bot module.'''
