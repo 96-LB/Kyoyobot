@@ -1,7 +1,8 @@
-import discord, os
+import discord, os, subprocess
+from discord.errors import HTTPException
 from importlib import import_module
 from typing import Any, cast
-from util.debug import DEBUG_GUILD, set_status
+from util.debug import DEBUG_GUILD, error, set_status
 from util.settings import Env
 
 # set up the discord client
@@ -37,5 +38,10 @@ async def on_ready() -> None:
 
 def run() -> None:
     '''Runs this module.'''
-    
-    bot.run(Env.get('TOKEN'))
+
+    try:
+        bot.run(Env.get('TOKEN'))
+    except HTTPException as e:
+        error(e, 'Failed to start bot! Restarting...')
+        subprocess.run(['kill', '1'])
+        
