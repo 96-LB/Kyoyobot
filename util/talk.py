@@ -1,10 +1,11 @@
+from typing import Union
 from util.settings import TalkConfig
 import random
 
 class START: ...
 class END: ...
 
-WORD_TYPE = str | START | END
+WORD_TYPE = Union[str, START, END]
 
 class WordData:
     '''Used by TalkGenerator to store data about word mappings.'''
