@@ -1,6 +1,7 @@
 import random
 from discord import app_commands as slash, Client, Interaction
 from util.debug import DEBUG_GUILD
+from util.talk import TalkGenerator
 
 DEBUG = False
 
@@ -50,8 +51,17 @@ async def ask(interaction: Interaction, question: str) -> None:
 
     await interaction.response.send_message(text)
 
+@slash.command()
+async def talk(interaction: Interaction) -> None:
+    '''Talk to your one true friend, Kyoyobot.'''
+
+    await interaction.response.send_message(TalkGenerator.generate())
+
 def setup(bot: Client, tree: slash.CommandTree) -> None:
     '''Sets up this bot module.'''
 
+    TalkGenerator.setup()
+
     tree.add_command(ping, guild=(DEBUG_GUILD if DEBUG else None))
     tree.add_command(ask, guild=(DEBUG_GUILD if DEBUG else None))
+    tree.add_command(talk, guild=(DEBUG_GUILD if DEBUG else None))
