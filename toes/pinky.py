@@ -38,7 +38,9 @@ async def ask(interaction: Interaction, question: str) -> None:
         'My reply is no.',
         'My sources say no.',
         'Outlook not so good.',
-        'Very doubtful.'
+        'Very doubtful.',
+	'Kyoyo says no'
+
     ]
 
     text = (
