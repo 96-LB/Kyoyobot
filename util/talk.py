@@ -1,4 +1,4 @@
-from typing import Union, Dict, List, Tuple, Type, cast
+from typing import Union, Dict, List, Tuple, Type, cast, Optional
 from typing_extensions import reveal_type
 from util.settings import TalkConfig
 import random
@@ -56,10 +56,11 @@ class TalkGenerator:
         current_word: WORD_TYPE = START
 
         while current_word is not END:
-            next_word_data: Union[Type[WordData], None] = TalkGenerator.word_to_data.get(current_word)
+            next_word_data: Optional[WordData] = TalkGenerator.word_to_data.get(current_word)
             if not next_word_data:
                 raise RuntimeError(f'TalkGenerator.generate() :: {current_word} has no data associated with it.')
-            
+            reveal_type(next_word_data) 
+
             next_word: WORD_TYPE = next_word_data.choose_word()
             if isinstance(next_word, str):
                 words.append(next_word)
