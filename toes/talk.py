@@ -1,6 +1,10 @@
-from typing import cast, Dict, Iterator, List, Tuple
-from util.settings import TalkConfig
 import random
+from discord import app_commands as slash, Client, Interaction
+from typing import cast, Dict, Iterator, List, Tuple
+from util.debug import DEBUG_GUILD
+from util.settings import TalkConfig
+
+DEBUG = False
 
 class TalkGenerator:
     '''Handles generating text that sounds like Kyoyo.'''
@@ -34,3 +38,15 @@ class TalkGenerator:
             word = cls.choose_word(word)
 
         return ' '.join(words)
+
+@slash.command()
+async def talk(interaction: Interaction) -> None:
+    '''Talk to your one true friend, Kyoyobot.'''
+
+    await interaction.response.send_message(TalkGenerator.generate())
+
+def setup(bot: Client, tree: slash.CommandTree) -> None:
+    '''Sets up this bot module.'''
+
+    TalkGenerator.setup()
+    tree.add_command(talk, guild=(DEBUG_GUILD if DEBUG else None))
