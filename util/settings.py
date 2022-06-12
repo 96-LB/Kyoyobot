@@ -98,7 +98,7 @@ class Env(Settings):
 class TalkConfig(Settings):
     '''Handles loading the talk Markov chain data.'''
 
-    SETTINGS_FILE: str = 'markov.jason'
+    SETTINGS_FILE: str = 'data/markov/kyoyo.jason'
 
     @classmethod
     def load_file(cls, file: TextIO) -> None:
