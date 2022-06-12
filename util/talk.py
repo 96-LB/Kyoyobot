@@ -1,5 +1,4 @@
 from typing import Union, Dict, List, Tuple, Type, cast, Optional
-from typing_extensions import reveal_type
 from util.settings import TalkConfig
 import random
 

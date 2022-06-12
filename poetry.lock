@@ -83,7 +83,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [[package]]
 name = "discord.py"
-version = "2.0.0a4330+g4e752913"
+version = "2.0.0a4343+g334ef1d7"
 description = "A Python wrapper for the Discord API"
 category = "main"
 optional = false
@@ -103,7 +103,7 @@ voice = ["PyNaCl (>=1.3.0,<1.6)"]
 type = "git"
 url = "https://github.com/Rapptz/discord.py"
 reference = "master"
-resolved_reference = "4e7529138c8ed9ee9fffaf6be2f95b5a1b3dd6e2"
+resolved_reference = "334ef1d7facce9dbfba2a6924bf57fc59bc827b5"
 
 [[package]]
 name = "flask"
