@@ -12,7 +12,7 @@ class TalkGenerator:
         '''Sets up word_to_data using the configuration loaded by TalkConfig.'''
 
         for word in TalkConfig.keys():
-            data = cast(Dict[str, Dict[str, int]], cls[word])['next_words']         
+            data = cast(Dict[str, Dict[str, int]], TalkConfig[word])['next_words']         
             cls.word_to_data[word] = tuple(zip(*data.items()))
 
     @classmethod
@@ -27,10 +27,10 @@ class TalkGenerator:
         '''Generates text using the loaded data.'''
 
         words: List[str] = []
-        word: str = TalkGenerator.word_to_data[''].choose_word()
+        word: str = cls.choose_word('')
 
         while word:
             words.append(word)
-            word = TalkGenerator.word_to_data[word].choose_word()
+            word = cls.choose_word(word)
 
         return ' '.join(words)
