@@ -38,9 +38,6 @@ class TalkGenerator:
 
         for from_word in TalkConfig.keys():
             data = cast(Dict[str, Dict[str, int]], TalkConfig.get(from_word)).get('next_words')
-            if not data:
-                raise RuntimeError(f'TalkGenerator.setup() :: {from_word} has no next_words field.')
-            reveal_type(data)
             words_and_counts: List[Tuple[WORD_TYPE, int]] = [(str(word) if word else END, int(count)) \
                 for (word, count) in data.items()]
             TalkGenerator.word_to_data[from_word if from_word else START] = WordData(
@@ -59,7 +56,7 @@ class TalkGenerator:
             next_word_data: Optional[WordData] = TalkGenerator.word_to_data.get(current_word)
             if not next_word_data:
                 raise RuntimeError(f'TalkGenerator.generate() :: {current_word} has no data associated with it.')
-            reveal_type(next_word_data) 
+            next_word_data = cast(WordData, next_word_data)
 
             next_word: WORD_TYPE = next_word_data.choose_word()
             if isinstance(next_word, str):
