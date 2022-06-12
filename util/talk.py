@@ -38,6 +38,7 @@ class TalkGenerator:
 
         for from_word in TalkConfig.keys():
             data = cast(Dict[str, Dict[str, int]], TalkConfig.get(from_word)).get('next_words')
+            assert data is not None
             words_and_counts: List[Tuple[WORD_TYPE, int]] = [(str(word) if word else END, int(count)) \
                 for (word, count) in data.items()]
             TalkGenerator.word_to_data[from_word if from_word else START] = WordData(
@@ -54,10 +55,7 @@ class TalkGenerator:
 
         while current_word is not END:
             next_word_data: Optional[WordData] = TalkGenerator.word_to_data.get(current_word)
-            if not next_word_data:
-                raise RuntimeError(f'TalkGenerator.generate() :: {current_word} has no data associated with it.')
-            next_word_data = cast(WordData, next_word_data)
-
+            assert next_word_data is not None
             next_word: WORD_TYPE = next_word_data.choose_word()
             if isinstance(next_word, str):
                 words.append(next_word)
