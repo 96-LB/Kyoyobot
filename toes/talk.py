@@ -13,9 +13,11 @@ def add_talk_command(group: slash.Group, name: str, description: str = '') -> No
     
     description = str(description or f'Have a conversation with {name}.')
 
+    config = TalkConfig(name)
+    
     word_to_data: Dict[str, Tuple[Iterator[str], Iterator[int]]] = {}
-    for word in TalkConfig.keys():
-        data = cast(Dict[str, Dict[str, int]], TalkConfig[word])['next_words']         
+    for word in config.keys():
+        data = cast(Dict[str, Dict[str, int]], config[word])      
         word_to_data[word] = tuple(zip(*data.items()))
 
     def choose_word(word: str):
@@ -43,5 +45,7 @@ def setup(bot: Client, tree: slash.CommandTree) -> None:
     talk = slash.Group(name='talk', description='Simulate conversations with people who don\'t want to talk to you.')
 
     add_talk_command(talk, 'kyoyo')
+    add_talk_command(talk, 'cap')
+    add_talk_command(talk, 'test')
     
     tree.add_command(talk, guild=(DEBUG_GUILD if DEBUG else None))
