@@ -41,7 +41,7 @@ class TalkGenerator:
             if not data:
                 raise RuntimeError(f'TalkGenerator.setup() :: {from_word} has no next_words field.')
             reveal_type(data)
-            words_and_counts: List[Tuple[str, int]] = [(str(word) if word else END, int(count)) \
+            words_and_counts: List[Tuple[WORD_TYPE, int]] = [(str(word) if word else END, int(count)) \
                 for (word, count) in data.items()]
             TalkGenerator.word_to_data[from_word if from_word else START] = WordData(
                 words=[word for (word, _) in words_and_counts],
