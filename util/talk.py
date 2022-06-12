@@ -37,7 +37,7 @@ class TalkGenerator:
         '''Sets up word_to_data using the configuration loaded by TalkConfig.'''
 
         for from_word in TalkConfig.keys():
-            data = cast(Dict[str, list], TalkConfig.get(from_word)).get('next_words')
+            data = cast(Dict[str, Dict[str, int]], TalkConfig.get(from_word)).get('next_words')
             if not data:
                 raise RuntimeError(f'TalkGenerator.setup() :: {from_word} has no next_words field.')
             reveal_type(data)
