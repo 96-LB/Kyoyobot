@@ -1,16 +1,11 @@
-from typing import Union, Dict, List, Tuple, Type, cast, Optional
+from typing import cast, Dict, List, Tuple
 from util.settings import TalkConfig
 import random
-
-class START: ...
-class END: ...
-
-WORD_TYPE = Union[str, Type[START], Type[END]]
 
 class WordData:
     '''Used by TalkGenerator to store data about word mappings.'''
 
-    def __init__(self, words: List[WORD_TYPE], counts: List[int]) -> None:
+    def __init__(self, words: List[str], counts: List[int]) -> None:
         '''Initializes WordData. Raises ValueError if words and counts aren't
         the same length.'''
         
@@ -20,7 +15,7 @@ class WordData:
         self.words = words
         self.counts = counts
 
-    def choose_word(self) -> WORD_TYPE:
+    def choose_word(self) -> str:
         '''Chooses a random word that will be the next word in the text.'''
 
         ret = random.choices(self.words, weights=self.counts)
@@ -29,7 +24,7 @@ class WordData:
 class TalkGenerator:
     '''Handles generating text that sounds like Kyoyo.'''
 
-    word_to_data: Dict[WORD_TYPE, WordData] = {}
+    word_to_data: Dict[str, WordData] = {}
 
     @classmethod
     def setup(cls) -> None:
@@ -38,9 +33,9 @@ class TalkGenerator:
         for from_word in TalkConfig.keys():
             data = cast(Dict[str, Dict[str, int]], TalkConfig.get(from_word)).get('next_words')
             assert data is not None
-            words_and_counts: List[Tuple[WORD_TYPE, int]] = [(str(word) if word else END, int(count)) \
+            words_and_counts: List[Tuple[str, int]] = [(word, int(count)) \
                 for (word, count) in data.items()]
-            TalkGenerator.word_to_data[from_word if from_word else START] = WordData(
+            TalkGenerator.word_to_data[from_word] = WordData(
                 words=[word for (word, _) in words_and_counts],
                 counts=[count for (_, count) in words_and_counts],
             )
@@ -50,14 +45,10 @@ class TalkGenerator:
         '''Generates text using the loaded data.'''
 
         words: List[str] = []
-        current_word: WORD_TYPE = START
+        word: str = TalkGenerator.word_to_data[''].choose_word()
 
-        while current_word is not END:
-            next_word_data: Optional[WordData] = TalkGenerator.word_to_data.get(current_word)
-            assert next_word_data is not None
-            next_word: WORD_TYPE = next_word_data.choose_word()
-            if isinstance(next_word, str):
-                words.append(next_word)
-            current_word = next_word
+        while word:
+            words.append(word)
+            word = TalkGenerator.word_to_data[word].choose_word()
 
         return ' '.join(words)
