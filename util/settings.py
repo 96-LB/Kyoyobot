@@ -1,6 +1,6 @@
 import os, json
 from abc import ABC, abstractmethod
-from typing import Any, Dict, TextIO, cast
+from typing import Any, Dict, TextIO, cast, List
 from util.debug import catch
 
 class Settings(ABC):
@@ -36,7 +36,7 @@ class Settings(ABC):
         return cls._data.get(setting, default)
 
     @classmethod
-    def keys(cls) -> list[str]:
+    def keys(cls) -> List[str]:
         '''Returns list of all keys.'''
 
         return list(cls._data.keys())

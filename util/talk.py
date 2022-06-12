@@ -1,11 +1,11 @@
-from typing import Union, Dict, List, Tuple
+from typing import Union, Dict, List, Tuple, Type
 from util.settings import TalkConfig
 import random
 
 class START: ...
 class END: ...
 
-WORD_TYPE = Union[str, START, END]
+WORD_TYPE = Union[str, Type[START], Type[END]]
 
 class WordData:
     '''Used by TalkGenerator to store data about word mappings.'''
@@ -51,7 +51,7 @@ class TalkGenerator:
         current_word: WORD_TYPE = START
 
         while current_word is not END:
-            next_word_data: WordData | None = TalkGenerator.word_to_data.get(current_word)
+            next_word_data: Union[Type[WordData], None] = TalkGenerator.word_to_data.get(current_word)
             if not next_word_data:
                 raise RuntimeError(f'TalkGenerator.generate() :: {current_word} has no data associated with it.')
             
