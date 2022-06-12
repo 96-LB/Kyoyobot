@@ -1,6 +1,6 @@
 import os, json
 from abc import ABC, abstractmethod
-from typing import Any, Dict, TextIO, cast
+from typing import Any, Dict, TextIO, cast, List
 from util.debug import catch
 
 class Settings(ABC):
@@ -35,6 +35,11 @@ class Settings(ABC):
         
         return cls._data.get(setting, default)
 
+    @classmethod
+    def keys(cls) -> List[str]:
+        '''Returns list of all keys.'''
+
+        return list(cls._data.keys())
 
     def __class_getitem__(cls, setting: str) -> object:
         '''Returns the value of the specified setting.'''
@@ -90,6 +95,23 @@ class Env(Settings):
         # defaults to os environment variables with the loaded data as fallback
         return os.getenv(setting, cls._data.get(setting, default))
 
+class TalkConfig(Settings):
+    '''Handles loading the talk Markov chain data.'''
+
+    SETTINGS_FILE: str = 'markov.jason'
+
+    @classmethod
+    def load_file(cls, file: TextIO) -> None:
+        '''Initializes the configuration data from the configuration JSON file.'''
+
+        cls._data = {}
+        
+        # attempts to load as a json object
+        with catch(json.decoder.JSONDecodeError, 'Settings :: Failed to load talk configuration data!'):
+            obj = json.loads(file.read())
+            if isinstance(obj, dict):
+                cls._data = obj
 
 Config.load()
 Env.load()
+TalkConfig.load()
