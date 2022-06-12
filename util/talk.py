@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, Dict, List, Tuple
 from util.settings import TalkConfig
 import random
 
@@ -10,7 +10,7 @@ WORD_TYPE = Union[str, START, END]
 class WordData:
     '''Used by TalkGenerator to store data about word mappings.'''
 
-    def __init__(self, words: list[WORD_TYPE], counts: list[int]) -> None:
+    def __init__(self, words: List[WORD_TYPE], counts: List[int]) -> None:
         '''Initializes WordData. Raises ValueError if words and counts aren't
         the same length.'''
         
@@ -29,14 +29,14 @@ class WordData:
 class TalkGenerator:
     '''Handles generating text that sounds like Kyoyo.'''
 
-    word_to_data: dict[WORD_TYPE, WordData] = {}
+    word_to_data: Dict[WORD_TYPE, WordData] = {}
 
     @classmethod
     def setup(cls) -> None:
         '''Sets up word_to_data using the configuration loaded by TalkConfig.'''
 
         for from_word in TalkConfig.keys():
-            words_and_counts: list[tuple[str, int]] = [(word if word else END, int(count)) \
+            words_and_counts: List[Tuple[str, int]] = [(word if word else END, int(count)) \
                 for (word, count) in TalkConfig.get(from_word).get('next_words').items()]
             TalkGenerator.word_to_data[from_word if from_word else START] = WordData(
                 words=[word for (word, _) in words_and_counts],
@@ -47,7 +47,7 @@ class TalkGenerator:
     def generate(cls) -> str:
         '''Generates text using the loaded data.'''
 
-        words: list[str] = []
+        words: List[str] = []
         current_word: WORD_TYPE = START
 
         while current_word is not END:
