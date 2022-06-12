@@ -1,4 +1,4 @@
-from typing import Union, Dict, List, Tuple, Type
+from typing import Union, Dict, List, Tuple, Type, cast
 from util.settings import TalkConfig
 import random
 
@@ -36,8 +36,9 @@ class TalkGenerator:
         '''Sets up word_to_data using the configuration loaded by TalkConfig.'''
 
         for from_word in TalkConfig.keys():
+            data = cast(Dict[str, list], TalkConfig.get(from_word)).get('next_words')
             words_and_counts: List[Tuple[str, int]] = [(word if word else END, int(count)) \
-                for (word, count) in TalkConfig.get(from_word).get('next_words').items()]
+                for (word, count) in data.items()]
             TalkGenerator.word_to_data[from_word if from_word else START] = WordData(
                 words=[word for (word, _) in words_and_counts],
                 counts=[count for (_, count) in words_and_counts],
