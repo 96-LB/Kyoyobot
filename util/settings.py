@@ -95,23 +95,28 @@ class Env(Settings):
         # defaults to os environment variables with the loaded data as fallback
         return os.getenv(setting, cls._data.get(setting, default))
 
-class TalkConfig(Settings):
-    '''Handles loading the talk Markov chain data.'''
+def TalkConfig(name: str):
+    '''TODO: change settings from being static classes and make this a json class lol'''
+    
+    class TalkConfigClass(Settings):
+        '''Handles loading the talk Markov chain data.'''
 
-    SETTINGS_FILE: str = 'markov.jason'
+        SETTINGS_FILE: str = f'data/markov/{name}.jason'
 
-    @classmethod
-    def load_file(cls, file: TextIO) -> None:
-        '''Initializes the configuration data from the configuration JSON file.'''
+        @classmethod
+        def load_file(cls, file: TextIO) -> None:
+            '''Initializes the configuration data from the configuration JSON file.'''
 
-        cls._data = {}
+            cls._data = {}
         
-        # attempts to load as a json object
-        with catch(json.decoder.JSONDecodeError, 'Settings :: Failed to load talk configuration data!'):
-            obj = json.loads(file.read())
-            if isinstance(obj, dict):
-                cls._data = obj
+            # attempts to load as a json object
+            with catch(json.decoder.JSONDecodeError, 'Settings :: Failed to load talk configuration data!'):
+                obj = json.loads(file.read())
+                if isinstance(obj, dict):
+                    cls._data = obj
+
+    TalkConfigClass.load()
+    return TalkConfigClass
 
 Config.load()
 Env.load()
-TalkConfig.load()
