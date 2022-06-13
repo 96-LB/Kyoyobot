@@ -1,27 +1,27 @@
 import json
-from typing import Iterable
+from typing import Dict, Iterable
 
 # This module is not for use with the bot, but rather as additional utility.
 
-def dce_to_messages(filenames: Iterable[str], user_id: int):
+def dce_to_messages(filenames: Iterable[str], users: Dict[str, str]):
     '''Extracts the specified user's messages from a set of DiscordChatExporter exports.'''
 
-    output = []
+    output = {user: [] for user in users.values()}
+    
     for filename in filenames:
         # attempt to load each file in JSON format
         try:
-            with open(filename, encoding = 'cp850') as file:
+            with open(filename, encoding='utf8') as file:
                 messages = json.loads(file.read()).get('messages', [])
         except:
             messages = []
 
         # check if the message is valid, and collect it if so
         for message in messages:
-            if message.get('author', {}).get('id') == user_id:
-                if message.get('type') == 'Default':
-                    content = message.get('content')
-                    if content is not None:
-                        output.append(content)
+            user = users.get(message.get('author', {}).get('id'))
+            content = message.get('content')    
+            if user and content and message.get('type') == 'Default':
+                output[user].append(content)
     
     return output
 
