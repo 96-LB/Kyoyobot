@@ -18,7 +18,7 @@ def error(e: Exception, msg: str = None) -> None:
     print('============')
 
 @contextmanager
-def catch(types : Union[Type, Tuple[Type]], msg : str = None) -> Generator[None, None, None]:
+def catch(types : Union[Type, Tuple[Type, ...]], msg : str = None) -> Generator[None, None, None]:
     '''Catches and handles the specified exception and logs it to the console.'''
     
     try:

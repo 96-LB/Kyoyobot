@@ -77,7 +77,7 @@ async def action_send_response(bot: Client, message: Message, trigger: Trigger, 
 async def action_react_standard(bot: Client, message: Message, trigger: Trigger, emoji: str) -> None:
     '''Reacts to the message with a standard emoji.'''
     
-    with catch(Exception, 'Triggers :: Failed to add standard emoji reaction!'):
+    with catch(Exception, f'Triggers :: Failed to add standard emoji reaction "{emoji}"!'):
         await message.add_reaction(emoji)
     
     await trigger(bot, message)
@@ -86,8 +86,8 @@ async def action_react_standard(bot: Client, message: Message, trigger: Trigger,
 async def action_react_custom(bot: Client, message: Message, trigger: Trigger, emoji_id: int) -> None:
     '''Reacts to the message with a custom emoji.'''
     
-    with catch(Exception, 'Triggers :: Failed to add custom emoji reaction!'):
-        await message.add_reaction(bot.get_emoji(emoji_id))
+    with catch(Exception, f'Triggers :: Failed to add custom emoji reaction "{emoji_id}"!'):
+        await message.add_reaction(bot.get_emoji(emoji_id)) # type: ignore
     
     await trigger(bot, message)
 
@@ -97,11 +97,12 @@ async def action_react_custom(bot: Client, message: Message, trigger: Trigger, e
 async def pick_random(bot: Client, message: Message, trigger: Trigger, factory: TriggerModifierFactory, args: Sequence):
     '''Applies a random argument from the list to the provided modifier factory.'''
 
+    # placeholder definition in case of exception 
     async def modified(bot: Client, message: Message) -> None: ...
     
     with catch(Exception, f'Triggers :: Failed to execute random trigger {factory}!'):
         modifier : TriggerModifier = factory(random.choice(args))
-        modified : Trigger = modifier(trigger)
+        modified : Trigger = modifier(trigger) # type: ignore[no-redef]
 
     await modified(bot, message)
     
@@ -109,19 +110,22 @@ async def pick_random(bot: Client, message: Message, trigger: Trigger, factory: 
 
 jason_trigger_types = {}
 
-def jason_trigger(name: str) -> Callable[[TriggerFactory], TriggerFactory]:
-    '''Labels a trigger factory with a string representation.'''
+def jason_trigger(factory: TriggerFactory, name: str = None) -> TriggerFactory:
+    '''Allows a trigger factor to be accessed from the configuration file.'''
+
+    # logs the factory function in the dictionary with the specified name
+    if name is None:
+        name = factory.__name__
+        if name.startswith('trigger_'): # common prefix
+            name = name[8:]
+    jason_trigger_types[name] = factory
     
-    def wrapper(factory: TriggerFactory) -> TriggerFactory:
-        jason_trigger_types[name] = factory
-        factory.__name__ = f'trigger_{name}'
-        return factory
-    return wrapper
+    return factory
 
 ###
 
-@jason_trigger('keyword_response')
-def _(*, keyword: str, case_sensitive: bool = False, probability: float = 100, response: str, **kwargs: Any) -> Trigger:
+@jason_trigger
+def trigger_keyword_response(*, keyword: str, case_sensitive: bool = False, probability: float = 100, response: str, **kwargs: Any) -> Trigger:
     '''Triggers a text response upon detecting a keyword.'''
     
     @if_keyword(keyword, case_sensitive)
@@ -130,8 +134,8 @@ def _(*, keyword: str, case_sensitive: bool = False, probability: float = 100, r
     async def trigger(bot: Client, message: Message): ...
     return trigger
 
-@jason_trigger('keyword_random_response')
-def _(*, keyword: str, case_sensitive: bool = False, probability: float = 100, responses: Sequence[str], **kwargs: Any) -> Trigger:
+@jason_trigger
+def trigger_keyword_random_response(*, keyword: str, case_sensitive: bool = False, probability: float = 100, responses: Sequence[str], **kwargs: Any) -> Trigger:
     '''Triggers a random text response upon detecting a keyword.'''
     
     @if_keyword(keyword, case_sensitive)
@@ -140,8 +144,8 @@ def _(*, keyword: str, case_sensitive: bool = False, probability: float = 100, r
     async def trigger(bot: Client, message: Message): ...
     return trigger
 
-@jason_trigger('keyword_reaction_standard')
-def _(*, keyword: str, case_sensitive: bool = False, probability: float = 100, emoji: str,  **kwargs: Any) -> Trigger:
+@jason_trigger
+def trigger_keyword_reaction_standard(*, keyword: str, case_sensitive: bool = False, probability: float = 100, emoji: str,  **kwargs: Any) -> Trigger:
     '''Triggers a standard emoji reaction upon detecting a keyword.'''
     
     @if_keyword(keyword, case_sensitive)
@@ -150,8 +154,8 @@ def _(*, keyword: str, case_sensitive: bool = False, probability: float = 100, e
     async def trigger(bot: Client, message: Message): ...
     return trigger
 
-@jason_trigger('keyword_reaction_custom')
-def _(*, keyword: str, case_sensitive: bool = False, probability: float = 100, emoji_id: int, **kwargs: Any) -> Trigger:
+@jason_trigger
+def trigger_keyword_reaction_custom(*, keyword: str, case_sensitive: bool = False, probability: float = 100, emoji_id: int, **kwargs: Any) -> Trigger:
     '''Triggers a custom emoji reaction upon detecting a keyword.'''
     
     @if_keyword(keyword, case_sensitive)
@@ -160,8 +164,8 @@ def _(*, keyword: str, case_sensitive: bool = False, probability: float = 100, e
     async def trigger(bot: Client, message: Message): ...
     return trigger
 
-@jason_trigger('keyword_reaction_random')
-def _(*, keyword: str, case_sensitive: bool = False, probability: float = 100, emojis: Sequence[str],  **kwargs: Any) -> Trigger:
+@jason_trigger
+def trigger_keyword_reaction_random(*, keyword: str, case_sensitive: bool = False, probability: float = 100, emojis: Sequence[str],  **kwargs: Any) -> Trigger:
     '''Triggers a standard emoji reaction upon detecting a keyword.'''
     
     @if_keyword(keyword, case_sensitive)
@@ -170,8 +174,8 @@ def _(*, keyword: str, case_sensitive: bool = False, probability: float = 100, e
     async def trigger(bot: Client, message: Message): ...
     return trigger
 
-@jason_trigger('user_response')
-def _(*, author_id: int, probability: float = 100, response: str,  **kwargs: Any) -> Trigger:
+@jason_trigger
+def trigger_user_response(*, author_id: int, probability: float = 100, response: str,  **kwargs: Any) -> Trigger:
     '''Triggers a text response upon detecting an author.'''
    
     @if_author(author_id)
@@ -180,8 +184,8 @@ def _(*, author_id: int, probability: float = 100, response: str,  **kwargs: Any
     async def trigger(bot: Client, message: Message): ...
     return trigger
 
-@jason_trigger('user_reaction_standard')
-def _(*, author_id: int, probability: float = 100, emoji: str,  **kwargs: Any) -> Trigger:
+@jason_trigger
+def trigger_user_reaction_standard(*, author_id: int, probability: float = 100, emoji: str,  **kwargs: Any) -> Trigger:
     '''Triggers a custom emoji reaction upon detecting an author.'''
    
     @if_author(author_id)
@@ -190,8 +194,8 @@ def _(*, author_id: int, probability: float = 100, emoji: str,  **kwargs: Any) -
     async def trigger(bot: Client, message: Message): ...
     return trigger
  
-@jason_trigger('user_reaction_custom')
-def _(*, author_id: int, probability: float = 100, emoji_id: int, **kwargs: Any) -> Trigger:
+@jason_trigger
+def trigger_user_reaction_custom(*, author_id: int, probability: float = 100, emoji_id: int, **kwargs: Any) -> Trigger:
     '''Triggers a custom emoji reaction upon detecting an author.'''
    
     @if_author(author_id)
