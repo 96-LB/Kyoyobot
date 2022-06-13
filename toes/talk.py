@@ -35,7 +35,7 @@ def get_markov(name: str) -> Callable[[], str]:
             words.append(word)
             word = choose_word(word)
                
-        return name.capitalize() + ": " + ' '.join(words)
+        return ' '.join(words)
 
     return markov
 
@@ -43,7 +43,7 @@ def add_talk_command(group: slash.Group, name: str, description: str = '') -> No
     '''Generates a talk commmand and adds it to the specified command group.'''
     
     description = str(description or f'Have a conversation with {name.capitalize()}.')
-    markov = get_markov(name)
+    markov = name.capitalize() + ': ' + get_markov(name)
 
     # attempt to add the command
     with catch((HTTPException, TypeError, CommandAlreadyRegistered), f'Talk :: Failed to load {name}\'s Markov chain!'):
