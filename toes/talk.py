@@ -49,7 +49,7 @@ def add_talk_command(group: slash.Group, name: str, description: str = '') -> No
     with catch((HTTPException, TypeError, CommandAlreadyRegistered), f'Talk :: Failed to load {name}\'s Markov chain!'):
         @group.command(name=name, description=description)
         async def _(interaction: Interaction) -> None:
-            await interaction.response.send_message(markov())
+            await interaction.response.send_message(f'{name.capitalize()}: {markov()}')
 
 def setup(bot: Client, tree: slash.CommandTree) -> None:
     '''Sets up this bot module.'''
