@@ -35,7 +35,7 @@ def get_markov(name: str) -> Callable[[], str]:
             words.append(word)
             word = choose_word(word)
                
-        return ' '.join(words)
+        return name.capitalize() + ": " + ' '.join(words)
 
     return markov
 
