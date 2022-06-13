@@ -34,6 +34,7 @@ def get_markov(name: str) -> Callable[[], str]:
         words: List[str] = []
         word: str = choose_word('')
 
+        # the empty string represents the start and end of the message
         while word:
             words.append(word)
             word = choose_word(word)
