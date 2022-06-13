@@ -2,7 +2,7 @@ import os, random
 from discord import app_commands as slash, Client, Interaction, Message
 from discord.errors import HTTPException
 from discord.app_commands.errors import CommandAlreadyRegistered
-from typing import cast, Callable, Dict, Iterator, List, Tuple
+from typing import Callable, Dict, List, Sequence, Tuple
 from util.debug import DEBUG_GUILD, catch
 from util.settings import TalkConfig
 
@@ -13,16 +13,19 @@ def get_markov(name: str) -> Callable[[], str]:
     '''Builds a Markov chain using the specified user's messages.'''
     
     config = TalkConfig(name)
-    
-    word_to_data: Dict[str, Tuple[Iterator[str], Iterator[int]]] = {}
+
+    # load the data from the markov chain data file
+    word_data: Dict[str, Tuple[Sequence[str], Sequence[int]]] = {}
     for word in config.keys():
-        data = cast(Dict[str, Dict[str, int]], config[word])      
-        word_to_data[word] = tuple(zip(*data.items()))
+        # these types can't be inferred so we can just ignore for now
+        # we should do some error checking later though
+        data = config[word] # type: ignore
+        word_data[word] = tuple(zip(*data.items())) # type: ignore
 
     def choose_word(word: str):
         '''Chooses a random word to follow the provided word in the generated text.'''
         
-        words, counts = word_to_data[word]
+        words, counts = word_data[word]
         return random.choices(words, weights=counts)[0]
 
     def markov() -> str:
@@ -74,6 +77,5 @@ def setup(bot: Client, tree: slash.CommandTree) -> None:
         
         # execute the master trigger if not in debug mode
         if not DEBUG or (message.guild is not None and message.guild.id == DEBUG_GUILD.id):
-            if bot.user.mentioned_in(message):
+            if bot.user is not None and bot.user.mentioned_in(message):
                 await message.channel.send(markov())
-        
