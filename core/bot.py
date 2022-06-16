@@ -1,7 +1,6 @@
 import discord, os, subprocess
 from discord.errors import HTTPException
 from importlib import import_module
-from typing import Any, cast
 from util.debug import DEBUG_GUILD, error, set_status
 from util.settings import Env
 
@@ -21,10 +20,10 @@ async def on_ready() -> None:
     # iterates over and loads every command group in the toes folder
     toes = [toe.replace('.py', '') for toe in os.listdir('toes') if '.py' in toe]
     for toe in toes:
-        await set_status(bot, f'loading {toe} toe...')
+        print(f'loading {toe} toe...')
         try:
             module = import_module(f'toes.{toe}')
-            cast(Any, module).setup(bot, tree)
+            module.setup(bot, tree) # type: ignore
         except Exception as e:
             await set_status(bot, f'failed to load {toe} toe!')
             raise e
