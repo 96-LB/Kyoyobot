@@ -13,7 +13,7 @@ class Bot(discord.Client):
     def event(self, new: Coro, /) -> Coro:
         '''Registers a new event without obliterating the old one.'''
         
-        old: Coro = getattr(self, new.__name__, None)
+        old: Coro = getattr(self, new.__name__, None) # type: ignore
 
         function: Coro = new
         if old is not None:
