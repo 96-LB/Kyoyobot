@@ -1,14 +1,36 @@
 import discord, os, subprocess
 from discord.errors import HTTPException
+from functools import wraps
 from importlib import import_module
+from typing import Any, Callable, Coroutine, TypeVar, cast
 from util.debug import DEBUG_GUILD, error, set_status
 from util.settings import Env
+
+Coro = TypeVar('Coro', bound=Callable[..., Coroutine[Any, Any, Any]])
+class Bot(discord.Client):
+    '''Extends a client to provide support for multiple event handlers.'''
+
+    def event(self, new: Coro, /) -> Coro:
+        '''Registers a new event without obliterating the old one.'''
+        
+        old: Coro = getattr(self, new.__name__, None)
+
+        function: Coro = new
+        if old is not None:
+            # run both the old function and the new one
+            @wraps(new)
+            async def wrapper(*args, **kwargs) -> None:
+                await old(*args, **kwargs)
+                await new(*args, **kwargs)
+            function = cast(Coro, wrapper) # why do we have to cast?
+        
+        return super().event(function)
 
 # set up the discord client
 intents = discord.Intents().default()
 intents.messages = True
 intents.message_content = True
-bot = discord.Client(intents=intents)
+bot = Bot(intents=intents)
 tree = discord.app_commands.CommandTree(bot)
 
 @bot.event

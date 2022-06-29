@@ -1,12 +1,12 @@
 import json
-from typing import Dict, Iterable
+from typing import Dict, List, Iterable
 
 # This module is not for use with the bot, but rather as additional utility.
 
 def dce_to_messages(filenames: Iterable[str], users: Dict[str, str]):
     '''Extracts the specified user's messages from a set of DiscordChatExporter exports.'''
 
-    output = {user: [] for user in users.values()}
+    output: Dict[str, List[str]] = {user: [] for user in users.values()}
     
     for filename in filenames:
         # attempt to load each file in JSON format
@@ -28,7 +28,7 @@ def dce_to_messages(filenames: Iterable[str], users: Dict[str, str]):
 def messages_to_markov(messages: Iterable[str]):
     '''Builds a Markov chain from the provided list of messages.''' 
 
-    obj = {}
+    obj: Dict[str, Dict[str, int]] = {}
 
     def add_transition(current: str, next: str):
         '''Adds the specified transition to the Markov chain.'''

@@ -238,3 +238,4 @@ def setup(bot: Client, tree: slash.CommandTree) -> None:
         # execute the master trigger if not in debug mode
         if not DEBUG or (message.guild is not None and message.guild.id == DEBUG_GUILD.id):
             await trigger(bot, message)
+    
