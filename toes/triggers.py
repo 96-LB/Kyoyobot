@@ -211,7 +211,7 @@ def trigger_user_reaction_custom(*, author_id: int, probability: float = 100, em
 
 ###
 
-async def trigger_null(bot: Client, message: Message) -> None: ...
+async def trigger_null(bot: Client, message: Message, /) -> None: ...
 
 def create_trigger(types : Sequence[str], **kwargs) -> Optional[Trigger]:
     '''Creates a trigger by stacking the specified modifier types.'''
