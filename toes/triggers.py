@@ -99,15 +99,16 @@ async def action_react_custom(bot: Client, message: Message, trigger: Trigger, *
 ###
 
 @modifier
-async def pick_random(bot: Client, message: Message, trigger: Trigger, *, factory: TriggerModifierFactory, args: Sequence, **kwargs: Any):
+async def pick_random(bot: Client, message: Message, trigger: Trigger, *, r_type: str, r_args: Sequence, **kwargs: Any):
     '''Applies a random argument from the list to the provided modifier factory.'''
 
     # placeholder definition in case of exception 
-    async def modified(bot: Client, message: Message) -> None: ...
+    modified = trigger_null
     
-    with catch(Exception, f'Triggers :: Failed to execute random trigger {factory}!'):
-        modifier : TriggerModifier = factory(random.choice(args))
-        modified : Trigger = modifier(trigger) # type: ignore[no-redef]
+    with catch(Exception, f'Triggers :: Failed to execute random trigger of type {r_type} with args {r_args}!'):
+        factory: TriggerModifierFactory = modifiers[r_type]
+        modifier: TriggerModifier = factory(random.choice(r_args)) # TODO: things don't take positional args anymore so we need to get the name too
+        modified: Trigger = modifier(trigger) # type: ignore[no-redef]
 
     await modified(bot, message)
     

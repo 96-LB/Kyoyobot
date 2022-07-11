@@ -19,9 +19,11 @@
 
     "triggers": [
         {
-            "type": "keyword_random_response",
+            "type": "if_keyword with_probability pick_random",
             "keyword": "\\?$",
-            "responses": [
+            "probability": 10,
+            "r_type": "action_send_response",
+            "r_args": [
                 "yeah",
                 "yes",
                 "ye",
@@ -29,8 +31,7 @@
                 "no",
                 "nope",
                 "?"
-            ],
-            "probability": 10
+            ]
         },
         {
             "type": "with_probability action_send_response",
@@ -56,10 +57,11 @@
             "emoji_id": 941354051059208222
         },
         {
-            "type": "random_emoji_thing",
+            "type": "if_keyword with_probability pick_random",
             "keyword": "\\b(slovak(ia(n)?)?|svk)\\b|🇸🇰",
             "probability": 20,
-            "emojis": [
+            "r_type": "action_react_standard",
+            "r_args": [
                 "🇸🇮",
                 "🇷🇸",
                 "🇨🇿",
