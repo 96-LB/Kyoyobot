@@ -56,7 +56,7 @@ async def if_author(bot: Client, message: Message, trigger: Trigger, *, author_i
         await trigger(bot, message)
 
 @modifier
-async def with_probability(bot: Client, message: Message, *, trigger: Trigger, probability: float, **kwargs: Any) -> None:
+async def with_probability(bot: Client, message: Message, trigger: Trigger, *, probability: float, **kwargs: Any) -> None:
     '''Executes the trigger with a random probability.'''
     
     if random.random() * 100 <= probability:
@@ -222,7 +222,7 @@ def create_trigger(types : Sequence[str], **kwargs) -> Optional[Trigger]:
         try:
             modifier_factory = modifiers.get(type)
             modifier = modifier_factory(**kwargs) # type: ignore
-            trigger = modifier(trigger) # type: ignore
+            trigger = modifier(trigger)
         except TypeError as e:
             error(e, f'Triggers :: Failed to create trigger of type {types} because of type {type}.')
             return None        
