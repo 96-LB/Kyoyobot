@@ -234,12 +234,7 @@ def setup(bot: Client, tree: slash.CommandTree) -> None:
 
     for trigger_info in trigger_config:
         trigger_type = trigger_info.get('type')
-        trigger_factory = jason_trigger_types.get(trigger_type)
-        
-        # attempt to create the trigger with the appropriate factory method
-        new_trigger : Optional[Trigger] = None
-        with catch(TypeError, f'Triggers :: Failed to create trigger of type {trigger_type}!'):
-            new_trigger = trigger_factory(**trigger_info) # type: ignore
+        new_trigger = create_trigger(trigger_type, **trigger_info)
         
         # combines the triggers
         if new_trigger:
