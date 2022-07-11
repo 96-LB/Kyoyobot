@@ -2,10 +2,10 @@ import random, re
 from discord import app_commands as slash, Client, Message
 from functools import wraps
 from typing import Any, Awaitable, Callable, Coroutine, Optional, Sequence
-from util.debug import DEBUG_GUILD, catch
+from util.debug import DEBUG_GUILD, catch, error
 from util.settings import Config
 
-DEBUG = False
+DEBUG = True
 
 Trigger = Callable[[Client, Message], Coroutine[Any, Any, None]]
 TriggerFactory = Callable[..., Trigger]
@@ -14,20 +14,25 @@ TriggerModifierFactory = Callable[..., TriggerModifier]
 
 ### MODIFIERS ###
 
+modifiers = {}
+
 def modifier(func: Callable[..., Awaitable[None]]) -> TriggerModifierFactory:
     '''Converts a flat trigger modifier into a compositable decorator factory.'''
-    
+
     @wraps(func)
-    def decorator_wrapper(*args: Any, **kwargs: Any) -> TriggerModifier:
+    def decorator_wrapper(**kwargs: Any) -> TriggerModifier:
         #a factory function which produces a decorator
         def decorator(trigger: Trigger) -> Trigger:
             #a decorator function
             @wraps(trigger)
             async def wrapper(bot: Client, message: Message) -> None:
                 #a wrapper which passes in the environment to the original function
-                await func(bot, message, trigger, *args)
+                await func(bot, message, trigger, **kwargs)
             return wrapper
         return decorator
+
+    # logs the modifier so that it is accessible from the jason file
+    modifiers[func.__name__] = decorator_wrapper
     return decorator_wrapper
 
 ###
@@ -37,35 +42,35 @@ def modifier(func: Callable[..., Awaitable[None]]) -> TriggerModifierFactory:
 # to call them, do NOT use `await`, and omit the first three arguments 
 
 @modifier
-async def if_keyword(bot: Client, message: Message, trigger: Trigger, keyword: str, case_sensitive: bool = False) -> None:
+async def if_keyword(bot: Client, message: Message, trigger: Trigger, *, keyword: str, case_sensitive: bool = False, **kwargs: Any) -> None:
     '''Executes the trigger only if the keyword is present in the message.'''
     
     if re.search(keyword, message.content, re.IGNORECASE if not case_sensitive else 0):
         await trigger(bot, message)
 
 @modifier
-async def if_author(bot: Client, message: Message, trigger: Trigger, author_id: int) -> None:
+async def if_author(bot: Client, message: Message, trigger: Trigger, *, author_id: int, **kwargs: Any) -> None:
     '''Executes the trigger only if the provided ID matches the message author.'''
    
     if message.author.id == author_id:
         await trigger(bot, message)
 
 @modifier
-async def with_probability(bot: Client, message: Message, trigger: Trigger, probability: float) -> None:
+async def with_probability(bot: Client, message: Message, *, trigger: Trigger, probability: float, **kwargs: Any) -> None:
     '''Executes the trigger with a random probability.'''
     
     if random.random() * 100 <= probability:
         await trigger(bot, message)
 
 @modifier
-async def action_trigger(bot: Client, message: Message, trigger: Trigger, other: Trigger) -> None:
+async def action_trigger(bot: Client, message: Message, trigger: Trigger, *, other: Trigger, **kwargs: Any) -> None:
     '''Executes another trigger.'''
     
     await other(bot, message)
     await trigger(bot, message)
 
 @modifier
-async def action_send_response(bot: Client, message: Message, trigger: Trigger, response: str) -> None:
+async def action_send_response(bot: Client, message: Message, trigger: Trigger, *, response: str, **kwargs: Any) -> None:
     '''Sends a text response in the channel in which the message was received.'''
     
     with catch(Exception, 'Triggers :: Failed to send message!'):
@@ -74,7 +79,7 @@ async def action_send_response(bot: Client, message: Message, trigger: Trigger, 
     await trigger(bot, message)
 
 @modifier
-async def action_react_standard(bot: Client, message: Message, trigger: Trigger, emoji: str) -> None:
+async def action_react_standard(bot: Client, message: Message, trigger: Trigger, *, emoji: str, **kwargs: Any) -> None:
     '''Reacts to the message with a standard emoji.'''
     
     with catch(Exception, f'Triggers :: Failed to add standard emoji reaction "{emoji}"!'):
@@ -83,7 +88,7 @@ async def action_react_standard(bot: Client, message: Message, trigger: Trigger,
     await trigger(bot, message)
 
 @modifier
-async def action_react_custom(bot: Client, message: Message, trigger: Trigger, emoji_id: int) -> None:
+async def action_react_custom(bot: Client, message: Message, trigger: Trigger, *, emoji_id: int, **kwargs: Any) -> None:
     '''Reacts to the message with a custom emoji.'''
     
     with catch(Exception, f'Triggers :: Failed to add custom emoji reaction "{emoji_id}"!'):
@@ -94,7 +99,7 @@ async def action_react_custom(bot: Client, message: Message, trigger: Trigger, e
 ###
 
 @modifier
-async def pick_random(bot: Client, message: Message, trigger: Trigger, factory: TriggerModifierFactory, args: Sequence):
+async def pick_random(bot: Client, message: Message, trigger: Trigger, *, factory: TriggerModifierFactory, args: Sequence, **kwargs: Any):
     '''Applies a random argument from the list to the provided modifier factory.'''
 
     # placeholder definition in case of exception 
@@ -209,17 +214,24 @@ def trigger_user_reaction_custom(*, author_id: int, probability: float = 100, em
 async def trigger_null(bot: Client, message: Message) -> None: ...
 
 def create_trigger(types : Sequence[str], **kwargs) -> Optional[Trigger]:
+    '''Creates a trigger by stacking the specified modifier types.'''
     
     trigger = trigger_null
     
     for type in reversed(types):
-        with catch(TypeError, f'Triggers :: Failed to create trigger of type {types} because of type {type}.'):
-            trigger_factory = jason_trigger_types.get(type)
-            trigger = trigger_factory(**kwargs)(trigger) # type: ignore
-            return None
-    
+        try:
+            modifier_factory = modifiers.get(type)
+            modifier = modifier_factory(**kwargs) # type: ignore
+            trigger = modifier(trigger) # type: ignore
+        except TypeError as e:
+            error(e, f'Triggers :: Failed to create trigger of type {types} because of type {type}.')
+            return None        
+
     return trigger
 
+def combine_triggers(first: Trigger, second: Trigger) -> Trigger:
+    return action_trigger(other=first)(second)
+    
 ### SETUP ###
 
 def setup(bot: Client, tree: slash.CommandTree) -> None:
@@ -233,12 +245,12 @@ def setup(bot: Client, tree: slash.CommandTree) -> None:
         trigger_config = list(Config.get('triggers')) # type: ignore
 
     for trigger_info in trigger_config:
-        trigger_type = trigger_info.get('type')
-        new_trigger = create_trigger(trigger_type, **trigger_info)
+        trigger_type = trigger_info.get('type', '').split()
+        new_trigger: Optional[Trigger] = create_trigger(trigger_type, **trigger_info)
         
         # combines the triggers
-        if new_trigger:
-            trigger = action_trigger(trigger)(new_trigger) # type: ignore
+        if new_trigger is not None:
+            trigger = combine_triggers(trigger, new_trigger)
     
     @bot.event
     async def on_message(message: Message) -> None:
@@ -249,4 +261,3 @@ def setup(bot: Client, tree: slash.CommandTree) -> None:
         # execute the master trigger if not in debug mode
         if not DEBUG or (message.guild is not None and message.guild.id == DEBUG_GUILD.id):
             await trigger(bot, message)
-    

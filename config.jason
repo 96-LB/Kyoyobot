@@ -33,7 +33,7 @@
             "probability": 10
         },
         {
-            "type": "keyword_response",
+            "type": "action_send_response",
             "keyword": "",
             "response": "I love feet 😍",
             "probability": 0.1
