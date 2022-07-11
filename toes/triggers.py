@@ -204,12 +204,28 @@ def trigger_user_reaction_custom(*, author_id: int, probability: float = 100, em
     async def trigger(bot: Client, message: Message): ...
     return trigger
 
+###
+
+async def trigger_null(bot: Client, message: Message) -> None: ...
+
+def create_trigger(types : Sequence[str], **kwargs) -> Optional[Trigger]:
+    
+    trigger = trigger_null
+    
+    for type in reversed(types):
+        with catch(TypeError, f'Triggers :: Failed to create trigger of type {types} because of type {type}.'):
+            trigger_factory = jason_trigger_types.get(type)
+            trigger = trigger_factory(**kwargs)(trigger) # type: ignore
+            return None
+    
+    return trigger
+
 ### SETUP ###
 
 def setup(bot: Client, tree: slash.CommandTree) -> None:
     '''Sets up this bot module.'''
 
-    async def trigger(__bot: Client, __message: Message) -> None: ...
+    trigger = trigger_null
 
     # pulls trigger information from the configuration file
     trigger_config = []
@@ -227,7 +243,7 @@ def setup(bot: Client, tree: slash.CommandTree) -> None:
         
         # combines the triggers
         if new_trigger:
-            trigger = action_trigger(trigger)(new_trigger)
+            trigger = action_trigger(trigger)(new_trigger) # type: ignore
     
     @bot.event
     async def on_message(message: Message) -> None:
