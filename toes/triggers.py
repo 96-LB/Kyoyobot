@@ -103,7 +103,7 @@ async def do_random(bot: Client, message: Message, trigger: Trigger, *, r_type: 
     '''Applies a random argument from the list to the provided modifier factory.'''
 
     # placeholder definition in case of exception 
-    modified = trigger_null
+    modified = null_trigger
     
     with catch(Exception, f'Triggers :: Failed to execute random trigger of type {r_type} with args {r_args}!'):
         factory: TriggerModifierFactory = modifiers[r_type]
@@ -114,21 +114,27 @@ async def do_random(bot: Client, message: Message, trigger: Trigger, *, r_type: 
 
 ###
 
-async def trigger_null(bot: Client, message: Message, /) -> None: ...
+async def null_trigger(bot: Client, message: Message, /) -> None: ...
 
-def create_trigger(types : Sequence[str], **kwargs) -> Optional[Trigger]:
+def create_trigger(**kwargs) -> Optional[Trigger]:
     '''Creates a trigger by stacking the specified modifier types.'''
+
+    types = kwargs.get('type', '')
+    try:
+        types = types.split()
+    except AttributeError as e:
+        error(e, f'Triggers :: Failed to create trigger of unreadable type {types}.')        
+        return None
     
-    trigger = trigger_null
-    
+    trigger = null_trigger
     for type in reversed(types):
         try:
             modifier_factory = modifiers.get(type)
             modifier = modifier_factory(**kwargs) # type: ignore
             trigger = modifier(trigger)
         except TypeError as e:
-            error(e, f'Triggers :: Failed to create trigger of type {types} because of type {type}.')
-            return None        
+            error(e, f'Triggers :: Failed to create trigger of type {types} because of type "{type}".')
+            return None
 
     return trigger
 
@@ -140,7 +146,7 @@ def combine_triggers(first: Trigger, second: Trigger) -> Trigger:
 def setup(bot: Client, tree: slash.CommandTree) -> None:
     '''Sets up this bot module.'''
 
-    trigger = trigger_null
+    trigger = null_trigger
 
     # pulls trigger information from the configuration file
     trigger_config = []
@@ -148,8 +154,7 @@ def setup(bot: Client, tree: slash.CommandTree) -> None:
         trigger_config = list(Config.get('triggers')) # type: ignore
 
     for trigger_info in trigger_config:
-        trigger_type = trigger_info.get('type', '').split()
-        new_trigger: Optional[Trigger] = create_trigger(trigger_type, **trigger_info)
+        new_trigger: Optional[Trigger] = create_trigger(**trigger_info)
         
         # combines the triggers
         if new_trigger is not None:
