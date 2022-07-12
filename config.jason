@@ -47,10 +47,22 @@
             "text": "💀"
         },
         {
+            "type": "if_keyword if_lucky do_text",
+            "keyword": "```",
+            "probability": 5,
+            "text": "https://cdn.discordapp.com/emojis/981421960879812618.webp"
+        },
+        {
             "type": "if_keyword if_lucky do_react",
             "keyword": "💀",
             "probability": 10,
             "emoji": "💀"
+        },
+        {
+            "type": "if_keyword if_lucky do_react_custom",
+            "keyword": "xf|fail",
+            "probability": 20,
+            "emoji_id": 981421960879812618
         },
         {
             "type": "if_keyword if_lucky do_react_custom",
@@ -113,16 +125,6 @@
             "author_id": 734540120329289840,
             "probability": 0.5,
             "emoji_id": 968369877901541426
-        },
-        {
-            "type": "if_keyword do_text do_another",
-            "keyword": "1",
-            "text": "2",
-            "other": {
-                "type": "if_keyword do_text",
-                "keyword": "3",
-                "text": "4"
-            }
         }
     ]
 }
