@@ -63,10 +63,12 @@ async def if_lucky(bot: Client, message: Message, trigger: Trigger, *, probabili
         await trigger(bot, message)
 
 @modifier
-async def do_another(bot: Client, message: Message, trigger: Trigger, *, other: Trigger, **kwargs: Any) -> None:
+async def do_another(bot: Client, message: Message, trigger: Trigger, *, other: Mapping[str, Any], **kwargs: Any) -> None:
     '''Executes another trigger before this one.'''
-    
-    await other(bot, message)
+
+    other = create_trigger(**other)
+    if other is not None:
+        await other(bot, message)
     await trigger(bot, message)
 
 @modifier
@@ -116,7 +118,7 @@ async def do_random(bot: Client, message: Message, trigger: Trigger, *, r_type: 
 
 async def null_trigger(bot: Client, message: Message, /) -> None: ...
 
-def create_trigger(**kwargs) -> Optional[Trigger]:
+def create_trigger(**kwargs: Any) -> Optional[Trigger]:
     '''Creates a trigger by stacking the specified modifier types.'''
 
     types = kwargs.get('type', '')
@@ -137,9 +139,6 @@ def create_trigger(**kwargs) -> Optional[Trigger]:
             return None
 
     return trigger
-
-def combine_triggers(first: Trigger, second: Trigger) -> Trigger:
-    return do_another(other=first)(second)
     
 ### SETUP ###
 
@@ -154,11 +153,8 @@ def setup(bot: Client, tree: slash.CommandTree) -> None:
         trigger_config = list(Config.get('triggers')) # type: ignore
 
     for trigger_info in trigger_config:
-        new_trigger: Optional[Trigger] = create_trigger(**trigger_info)
-        
         # combines the triggers
-        if new_trigger is not None:
-            trigger = combine_triggers(trigger, new_trigger)
+        trigger = do_another(other=trigger_info)(trigger)
     
     @bot.event
     async def on_message(message: Message) -> None:

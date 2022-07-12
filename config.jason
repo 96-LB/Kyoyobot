@@ -113,6 +113,16 @@
             "author_id": 734540120329289840,
             "probability": 0.5,
             "emoji_id": 968369877901541426
+        },
+        {
+            "type": "if_keyword do_text do_another",
+            "keyword": "1",
+            "text": "2",
+            "other": {
+                "type": "if_keyword do_text",
+                "keyword": "3",
+                "text": "4"
+            }
         }
     ]
 }
