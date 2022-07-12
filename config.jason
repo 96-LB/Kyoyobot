@@ -22,8 +22,8 @@
             "type": "if_keyword if_lucky do_random",
             "keyword": "\\?$",
             "probability": 10,
-            "r_type": "do_text",
-            "r_args": {
+            "choices": {
+                "type": "do_text",
                 "text": [
                     "yeah",
                     "yes",
@@ -62,8 +62,8 @@
             "type": "if_keyword if_lucky do_random",
             "keyword": "\\b(slovak(ia(n)?)?|svk)\\b|🇸🇰",
             "probability": 20,
-            "r_type": "do_react",
-            "r_args": {
+            "choices": {
+                "type": "do_react",
                 "emoji": [
                     "🇸🇮",
                     "🇷🇸",

@@ -12,6 +12,9 @@ TriggerFactory = Callable[..., Trigger]
 TriggerModifier = Callable[[Trigger], Trigger]
 TriggerModifierFactory = Callable[..., TriggerModifier]
 
+async def null_trigger(bot: Client, message: Message, /) -> None: ...
+
+
 ### MODIFIERS ###
 
 modifiers = {}
@@ -62,14 +65,7 @@ async def if_lucky(bot: Client, message: Message, trigger: Trigger, *, probabili
     if random.random() * 100 <= probability:
         await trigger(bot, message)
 
-@modifier
-async def do_another(bot: Client, message: Message, trigger: Trigger, *, other: Mapping[str, Any], **kwargs: Any) -> None:
-    '''Executes another trigger before this one.'''
-
-    other = create_trigger(**other)
-    if other is not None:
-        await other(bot, message)
-    await trigger(bot, message)
+###
 
 @modifier
 async def do_text(bot: Client, message: Message, trigger: Trigger, *, text: str, **kwargs: Any) -> None:
@@ -101,22 +97,28 @@ async def do_react_custom(bot: Client, message: Message, trigger: Trigger, *, em
 ###
 
 @modifier
-async def do_random(bot: Client, message: Message, trigger: Trigger, *, r_type: str, r_args: Mapping[str, Sequence], **kwargs: Any):
-    '''Applies a random argument from the list to the provided modifier factory.'''
+async def do_another(bot: Client, message: Message, trigger: Trigger, *, other: Mapping[str, Any], **kwargs: Any) -> None:
+    '''Executes another trigger before this one.'''
 
-    # placeholder definition in case of exception 
-    modified = null_trigger
+    other = create_trigger(**other)
+    if other is not None:
+        await other(bot, message)
+    await trigger(bot, message)
+
+@modifier
+async def do_random(bot: Client, message: Message, trigger: Trigger, *, choices: Mapping[str, Sequence], **kwargs: Any):
+    '''Executes another trigger with random arguments before this one.'''
+
+    with catch(Exception, f'Triggers :: Failed to execute random trigger!'):
+        other = {key: values if key == 'type' else random.choice(values) for key, values in choices.items()}
     
-    with catch(Exception, f'Triggers :: Failed to execute random trigger of type {r_type} with args {r_args}!'):
-        factory: TriggerModifierFactory = modifiers[r_type]
-        modifier: TriggerModifier = factory(**{key: random.choice(values) for key, values in r_args.items()})
-        modified = modifier(trigger)
-
+    modified = add_trigger(trigger, other)
     await modified(bot, message)
+    
+### SETUP ###
 
-###
-
-async def null_trigger(bot: Client, message: Message, /) -> None: ...
+def add_trigger(trigger: Trigger, other: Mapping[str, Any]):
+    return do_another(other=other)(trigger)
 
 def create_trigger(**kwargs: Any) -> Optional[Trigger]:
     '''Creates a trigger by stacking the specified modifier types.'''
@@ -139,8 +141,6 @@ def create_trigger(**kwargs: Any) -> Optional[Trigger]:
             return None
 
     return trigger
-    
-### SETUP ###
 
 def setup(bot: Client, tree: slash.CommandTree) -> None:
     '''Sets up this bot module.'''
@@ -154,7 +154,7 @@ def setup(bot: Client, tree: slash.CommandTree) -> None:
 
     for trigger_info in trigger_config:
         # combines the triggers
-        trigger = do_another(other=trigger_info)(trigger)
+        trigger = add_trigger(trigger, trigger_info)
     
     @bot.event
     async def on_message(message: Message) -> None:
