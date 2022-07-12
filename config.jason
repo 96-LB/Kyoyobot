@@ -19,10 +19,10 @@
 
     "triggers": [
         {
-            "type": "if_keyword with_probability pick_random",
+            "type": "if_keyword if_lucky do_random",
             "keyword": "\\?$",
             "probability": 10,
-            "r_type": "action_send_response",
+            "r_type": "do_text",
             "r_args": {
                 "response": [
                     "yeah",
@@ -36,33 +36,33 @@
             }
         },
         {
-            "type": "with_probability action_send_response",
+            "type": "if_lucky do_text",
             "probability": 0.1,
             "response": "I love feet 😍"
         },
         {
-            "type": "if_keyword with_probability action_send_response",
+            "type": "if_keyword if_lucky do_text",
             "keyword": "💀",
             "probability": 5,
             "response": "💀"
         },
         {
-            "type": "if_keyword with_probability action_react_standard",
+            "type": "if_keyword if_lucky do_react",
             "keyword": "💀",
             "probability": 10,
             "emoji": "💀"
         },
         {
-            "type": "if_keyword with_probability action_react_custom",
+            "type": "if_keyword if_lucky do_react_custom",
             "keyword": "\\bbeelau\\b",
             "probability": 20,
             "emoji_id": 941354051059208222
         },
         {
-            "type": "if_keyword with_probability pick_random",
+            "type": "if_keyword if_lucky do_random",
             "keyword": "\\b(slovak(ia(n)?)?|svk)\\b|🇸🇰",
             "probability": 20,
-            "r_type": "action_react_standard",
+            "r_type": "do_react",
             "r_args": {
                 "emoji": [
                     "🇸🇮",
@@ -73,43 +73,43 @@
             }
         },
         {
-            "type": "if_author with_probability action_react_standard",
+            "type": "if_author if_lucky do_react",
             "author_id": 757355879975747587,
             "probability": 0.25,
             "emoji": "🦓"
         },
         {
-            "type": "if_author with_probability action_react_custom",
+            "type": "if_author if_lucky do_react_custom",
             "author_id": 757355879975747587,
             "probability": 0.25,
             "emoji_id": 944384071654580266
         },
         {
-            "type": "if_author with_probability action_react_custom",
+            "type": "if_author if_lucky do_react_custom",
             "author_id": 285167387278442506,
             "probability": 0.25,
             "emoji_id": 968582865442967582
         },
         {
-            "type": "if_author with_probability action_react_custom",
+            "type": "if_author if_lucky do_react_custom",
             "author_id": 285167387278442506,
             "probability": 0.25,
             "emoji_id": 979140176318169108
         },
         {
-            "type": "if_author with_probability action_react_custom",
+            "type": "if_author if_lucky do_react_custom",
             "author_id": 236257776421175296,
             "probability": 0.5,
             "emoji_id": 936482360290050069
         },
         {
-            "type": "if_author with_probability action_react_custom",
+            "type": "if_author if_lucky do_react_custom",
             "author_id": 336919720550989824,
             "probability": 0.5,
             "emoji_id": 941354051059208222
         },
         {
-            "type": "if_author with_probability action_react_custom",
+            "type": "if_author if_lucky do_react_custom",
             "author_id": 734540120329289840,
             "probability": 0.5,
             "emoji_id": 968369877901541426
