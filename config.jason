@@ -23,15 +23,17 @@
             "keyword": "\\?$",
             "probability": 10,
             "r_type": "action_send_response",
-            "r_args": [
-                "yeah",
-                "yes",
-                "ye",
-                "nah",
-                "no",
-                "nope",
-                "?"
-            ]
+            "r_args": {
+                "response": [
+                    "yeah",
+                    "yes",
+                    "ye",
+                    "nah",
+                    "no",
+                    "nope",
+                    "?"
+                ]
+            }
         },
         {
             "type": "with_probability action_send_response",
@@ -61,12 +63,14 @@
             "keyword": "\\b(slovak(ia(n)?)?|svk)\\b|🇸🇰",
             "probability": 20,
             "r_type": "action_react_standard",
-            "r_args": [
-                "🇸🇮",
-                "🇷🇸",
-                "🇨🇿",
-                "🇷🇺"
-            ]
+            "r_args": {
+                "emoji": [
+                    "🇸🇮",
+                    "🇷🇸",
+                    "🇨🇿",
+                    "🇷🇺"
+                ]
+            }
         },
         {
             "type": "if_author with_probability action_react_standard",
