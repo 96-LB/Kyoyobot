@@ -70,11 +70,11 @@ async def do_another(bot: Client, message: Message, trigger: Trigger, *, other: 
     await trigger(bot, message)
 
 @modifier
-async def do_text(bot: Client, message: Message, trigger: Trigger, *, response: str, **kwargs: Any) -> None:
+async def do_text(bot: Client, message: Message, trigger: Trigger, *, text: str, **kwargs: Any) -> None:
     '''Sends a text response in the channel in which the message was received.'''
     
     with catch(Exception, 'Triggers :: Failed to send message!'):
-        await message.channel.send(response)
+        await message.channel.send(text)
     
     await trigger(bot, message)
 

@@ -24,7 +24,7 @@
             "probability": 10,
             "r_type": "do_text",
             "r_args": {
-                "response": [
+                "text": [
                     "yeah",
                     "yes",
                     "ye",
@@ -38,13 +38,13 @@
         {
             "type": "if_lucky do_text",
             "probability": 0.1,
-            "response": "I love feet 😍"
+            "text": "I love feet 😍"
         },
         {
             "type": "if_keyword if_lucky do_text",
             "keyword": "💀",
             "probability": 5,
-            "response": "💀"
+            "text": "💀"
         },
         {
             "type": "if_keyword if_lucky do_react",
