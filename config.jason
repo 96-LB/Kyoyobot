@@ -53,6 +53,18 @@
             "text": "https://cdn.discordapp.com/emojis/981421960879812618.webp"
         },
         {
+            "type": "if_keyword if_lucky do_text",
+            "keyword": "kyoyo",
+            "probability": 1,
+            "text": "hi"
+        },
+        {
+            "type": "if_keyword if_lucky do_text",
+            "keyword": "\\ba-\\b",
+            "probability": 5,
+            "text": "why not a+?"
+        },
+        {
             "type": "if_keyword if_lucky do_react",
             "keyword": "💀",
             "probability": 10,
