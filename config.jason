@@ -19,95 +19,124 @@
 
     "triggers": [
         {
-            "type": "keyword_random_response",
+            "type": "if_keyword if_lucky do_random",
             "keyword": "\\?$",
-            "responses": [
-                "yeah",
-                "yes",
-                "ye",
-                "nah",
-                "no",
-                "nope",
-                "?"
-            ],
-            "probability": 10
+            "probability": 10,
+            "choices": {
+                "type": "do_text",
+                "text": [
+                    "yeah",
+                    "yes",
+                    "ye",
+                    "nah",
+                    "no",
+                    "nope",
+                    "?"
+                ]
+            }
         },
         {
-            "type": "keyword_response",
-            "keyword": "",
-            "response": "I love feet 😍",
-            "probability": 0.1
+            "type": "if_lucky do_text",
+            "probability": 0.1,
+            "text": "I love feet 😍"
         },
         {
-            "type": "keyword_response",
+            "type": "if_keyword if_lucky do_text",
             "keyword": "💀",
-            "response": "💀",
-            "probability": 5
+            "probability": 5,
+            "text": "💀"
         },
         {
-            "type": "keyword_reaction_standard",
+            "type": "if_keyword if_lucky do_text",
+            "keyword": "```",
+            "probability": 5,
+            "text": "https://cdn.discordapp.com/emojis/981421960879812618.webp"
+        },
+        {
+            "type": "if_keyword if_lucky do_text",
+            "keyword": "kyoyo",
+            "probability": 1,
+            "text": "hi"
+        },
+        {
+            "type": "if_keyword if_lucky do_text",
+            "keyword": "\\ba-\\b",
+            "probability": 5,
+            "text": "why not a+?"
+        },
+        {
+            "type": "if_keyword if_lucky do_react",
             "keyword": "💀",
-            "emoji": "💀",
-            "probability": 10
+            "probability": 10,
+            "emoji": "💀"
         },
         {
-            "type": "keyword_reaction_custom",
+            "type": "if_keyword if_lucky do_react_custom",
+            "keyword": "xf|fail",
+            "probability": 20,
+            "emoji_id": 981421960879812618
+        },
+        {
+            "type": "if_keyword if_lucky do_react_custom",
             "keyword": "\\bbeelau\\b",
-            "emoji_id": 941354051059208222,
-            "probability": 20
+            "probability": 20,
+            "emoji_id": 941354051059208222
         },
         {
-            "type": "keyword_reaction_random",
+            "type": "if_keyword if_lucky do_random",
             "keyword": "\\b(slovak(ia(n)?)?|svk)\\b|🇸🇰",
-            "emojis": [
-                "🇸🇮",
-                "🇷🇸",
-                "🇨🇿",
-                "🇷🇺"
-            ],
-            "probability": 20
+            "probability": 20,
+            "choices": {
+                "type": "do_react",
+                "emoji": [
+                    "🇸🇮",
+                    "🇷🇸",
+                    "🇨🇿",
+                    "🇷🇺"
+                ]
+            }
         },
         {
-            "type": "user_reaction_standard",
+            "type": "if_author if_lucky do_react",
             "author_id": 757355879975747587,
-            "emoji": "🦓",
-            "probability": 0.25
+            "probability": 0.25,
+            "emoji": "🦓"
         },
         {
-            "type": "user_reaction_custom",
+            "type": "if_author if_lucky do_react_custom",
             "author_id": 757355879975747587,
-            "emoji_id": 944384071654580266,
-            "probability": 0.25
+            "probability": 0.25,
+            "emoji_id": 944384071654580266
         },
         {
-            "type": "user_reaction_custom",
+            "type": "if_author if_lucky do_react_custom",
             "author_id": 285167387278442506,
-            "emoji_id": 968582865442967582,
-            "probability": 0.25
+            "probability": 0.25,
+            "emoji_id": 968582865442967582
         },
         {
-            "type": "user_reaction_custom",
+            "type": "if_author if_lucky do_react_custom",
             "author_id": 285167387278442506,
-            "emoji_id": 979140176318169108,
-            "probability": 0.25
+            "probability": 0.25,
+            "emoji_id": 979140176318169108
         },
         {
-            "type": "user_reaction_custom",
+            "type": "if_author if_lucky do_react_custom",
             "author_id": 236257776421175296,
-            "emoji_id": 936482360290050069,
-            "probability": 0.5
+            "probability": 0.5,
+            "emoji_id": 936482360290050069
         },
         {
-            "type": "user_reaction_custom",
+            "type": "if_author if_lucky do_react_custom",
             "author_id": 336919720550989824,
-            "emoji_id": 941354051059208222,
-            "probability": 0.5
+            "probability": 0.5,
+            "emoji_id": 941354051059208222
         },
         {
-            "type": "user_reaction_custom",
+            "type": "if_author if_lucky do_react_custom",
             "author_id": 734540120329289840,
-            "emoji_id": 968369877901541426,
-            "probability": 0.5
+            "probability": 0.5,
+            "emoji_id": 968369877901541426
         }
     ]
 }
