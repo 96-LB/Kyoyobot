@@ -100,9 +100,9 @@ async def do_react_custom(bot: Client, message: Message, trigger: Trigger, *, em
 async def do_another(bot: Client, message: Message, trigger: Trigger, *, other: Mapping[str, Any], **kwargs: Any) -> None:
     '''Executes another trigger before this one.'''
 
-    other = create_trigger(**other)
-    if other is not None:
-        await other(bot, message)
+    other_trigger = create_trigger(**other)
+    if other_trigger is not None:
+        await other_trigger(bot, message)
     await trigger(bot, message)
 
 @modifier
