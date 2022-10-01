@@ -14,6 +14,11 @@
             "name": "xf",
             "url": "https://cdn.discordapp.com/emojis/981421960879812618.webp",
             "description": "Failure due to academic dishonesty"
+        },
+        {
+            "name": "nonoptional",
+            "url": "https://cdn.discordapp.com/attachments/756705298634506367/920159783946973215/unknown.png",
+            "description": "a picture of a tall white rectangle"
         }
     ],
 
