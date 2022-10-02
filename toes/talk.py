@@ -4,7 +4,7 @@ from discord.errors import HTTPException
 from discord.app_commands.errors import CommandAlreadyRegistered
 from typing import Callable, Dict, List, Sequence, Tuple
 from util.debug import DEBUG_GUILD, catch
-from util.settings import TalkConfig
+from util.settings import json_settings
 
 DEBUG = False
 PATH = 'data/markov/'
@@ -12,7 +12,7 @@ PATH = 'data/markov/'
 def get_markov(name: str) -> Callable[[], str]:
     '''Builds a Markov chain using the specified user's messages.'''
     
-    config = TalkConfig(name)
+    config = json_settings(f'data/markov/{name}.jason')
 
     # load the data from the markov chain data file
     word_data: Dict[str, Tuple[Sequence[str], Sequence[int]]] = {}

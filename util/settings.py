@@ -1,122 +1,84 @@
 import os, json
-from abc import ABC, abstractmethod
-from typing import Any, Dict, TextIO, cast, List
+from typing import Any, Callable, Dict, List, Optional
 from util.debug import catch
 
-class Settings(ABC):
+
+class Settings():
     '''Handles configuration data.'''
 
-    _data: Dict[str, Any] = {}
-    
-    @property
-    @classmethod
-    @abstractmethod
-    def SETTINGS_FILE(self) -> str: ...
-    
-    @classmethod
-    @abstractmethod
-    def load(cls) -> None:
-        '''Initializes the configuration data from the default file.'''
+    _data: Dict[str, Any]
+    _callback: Optional[Callable[[str], Any]]
 
-        try:
-            with open(cast(str, cls.SETTINGS_FILE), 'r') as file:
-                cls.load_file(file)
-        except FileNotFoundError:
-            cls._data = {}
+    def __init__(self,
+                 data: Dict[str, Any],
+                 callback: Optional[Callable[[str], Any]] = None):
+        self._data = data
+        self._callback = callback
 
-    @classmethod
-    @abstractmethod
-    def load_file(cls, file: TextIO) -> None:
-        '''Initializes the configuration data from the specified file.'''
-
-    @classmethod
-    def get(cls, setting: str, default: object = None) -> object:
+    def get(self, setting: str, default: object = None) -> Optional[Any]:
         '''Returns the value of the specified setting or the provided default.'''
-        
-        return cls._data.get(setting, default)
 
-    @classmethod
-    def keys(cls) -> List[str]:
+        # try to pull from the dictionary first
+        obj = self._data.get(setting)
+
+        # use the callback fallback
+        if obj is None and self._callback is not None:
+            try:
+                obj = self._callback(setting)
+            except:
+                pass
+
+        return obj if obj is not None else default
+
+    def keys(self) -> List[str]:
         '''Returns list of all keys.'''
 
-        return list(cls._data.keys())
+        return list(self._data.keys())
 
-    def __class_getitem__(cls, setting: str) -> object:
+    def __getitem__(self, setting: str) -> Any:
         '''Returns the value of the specified setting.'''
 
         # throws on failure
-        value = cls.get(setting)
+        value = self.get(setting)
         if value is None:
             raise KeyError(setting)
         else:
             return value
 
 
-class Config(Settings):
-    '''Handles configuration data pulled from a public file.'''
-    
-    SETTINGS_FILE: str = 'config.jason'
-    
-    @classmethod
-    def load_file(cls, file: TextIO) -> None:
-        '''Initializes the configuration data from the configuration JSON file.'''
+def json_settings(filename: str) -> Settings:
+    '''Loads configuration settings stored as JSON data.'''
 
-        cls._data = {}
-        
-        # attempts to load as a json object
-        with catch(json.decoder.JSONDecodeError, 'Settings :: Failed to load configuration data!'):
+    with catch((json.decoder.JSONDecodeError, FileNotFoundError),
+               f'Settings :: Failed to load JSON data from {filename}!'):
+
+        with open(filename) as file:
             obj = json.loads(file.read())
+
+            # force result to be a dictionary
             if isinstance(obj, dict):
-                cls._data = obj
+                return Settings(obj)
+            else:
+                return Settings({'_data': obj})
 
 
+def env_settings(filename: str) -> Settings:
+    '''Loads configuration settings stored in key=value format.'''
 
-class Env(Settings):
-    '''Handles sensitive or secret configuration data pulled from environment variables.'''
-    
-    SETTINGS_FILE: str = '.env'
-    
-    @classmethod
-    def load_file(cls, file: TextIO) -> None:
-        '''Initializes the configuration data from the secrets file.'''
-        
-        cls._data = {}
-        
-        # attempts to parse each line in key=value format
-        for line in file.readlines():
-            with catch(ValueError, f'Settings :: Failed to parse line "{line}"'):
-                key, value = line.split('=', 1)
-                cls._data[key] = value.rstrip('\r\n')
-        
-    @classmethod
-    def get(cls, setting: str, default: object = None) -> str:
-        '''Returns the value of the specified setting or the provided default.'''
+    obj: Dict[str, str] = {}
+    with catch(FileNotFoundError,
+               f'Settings :: Failed to load ENV data from {filename}!'):
 
-        # defaults to os environment variables with the loaded data as fallback
-        return os.getenv(setting, cls._data.get(setting, default))
+        with open(filename) as file:
 
-def TalkConfig(name: str):
-    '''TODO: change settings from being static classes and make this a json class lol'''
-    
-    class TalkConfigClass(Settings):
-        '''Handles loading the talk Markov chain data.'''
+            # attempts to parse each line in key=value format
+            for line in file.readlines():
+                with catch(ValueError,
+                           f'Settings :: Failed to parse ENV line "{line}"'):
+                    key, value = line.split('=', 1)
+                    obj[key] = value.rstrip('\r\n')
 
-        SETTINGS_FILE: str = f'data/markov/{name}.jason'
+    return Settings(obj, callback=os.getenv)
 
-        @classmethod
-        def load_file(cls, file: TextIO) -> None:
-            '''Initializes the configuration data from the configuration JSON file.'''
-
-            cls._data = {}
-        
-            # attempts to load as a json object
-            with catch(json.decoder.JSONDecodeError, 'Settings :: Failed to load talk configuration data!'):
-                obj = json.loads(file.read())
-                if isinstance(obj, dict):
-                    cls._data = obj
-
-    TalkConfigClass.load()
-    return TalkConfigClass
-
-Config.load()
-Env.load()
+Config = json_settings('config.jason')
+Env = env_settings('.env')
