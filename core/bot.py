@@ -61,7 +61,7 @@ def run() -> None:
     '''Runs this module.'''
 
     try:
-        bot.run(Env.get('TOKEN'))
+        bot.run(str(Env.get('TOKEN')))
     except HTTPException as e:
         if Env.get('HOST') == 'R':
             error(e, 'Failed to start bot! Restarting...')
