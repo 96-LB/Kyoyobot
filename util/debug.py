@@ -34,4 +34,4 @@ def catch(types : Union[Type, Tuple[Type, ...]], msg : str = None) -> Generator[
 # moved to prevent circular import
 from util.settings import Env
 
-DEBUG_GUILD: discord.Object = discord.Object(id=Env.get('DEBUG_GUILD', '0'))
+DEBUG_GUILD: discord.Object = discord.Object(id=str(Env.get('DEBUG_GUILD', 0)))
