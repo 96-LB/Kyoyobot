@@ -7,10 +7,10 @@ DEBUG = False
 # This command will have the bot send a message to a specified text channel 
 # bot will announce the user who initiated the command in the current channel
 @slash.command()
-async def say(interaction: Interaction, channel: TextChannel, message:str,) -> None:
+async def say(interaction: Interaction, channel: TextChannel, message: str) -> None:
     '''Have Kyoyobot say something in a channel.'''
     
-    text = f'{interaction.user} told me to say \"{message}\" in #{channel.name}\n'
+    text = f'{interaction.user.mention} told me to say \"{message}\" in #{channel.mention}\n'
     await channel.send(message)
     await interaction.response.send_message(text) 
     
