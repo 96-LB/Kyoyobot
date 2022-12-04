@@ -13,16 +13,6 @@ async def say(interaction: Interaction, channel: TextChannel, message:str,) -> N
     await interaction.response.send_message(text)
     
 
-#@say.autocomplete('channel')
-#async def channels_autocomplete(interaction: Interaction, current: str) -> list[slash.Choice[str]]:
-#    channels = []
-#    for item in Client.get_all_channels():
-#        channels.append(item)
-#    return [slash.Choice(name=channel, value=channel) for channel in channels if current.lower() in channel.name]
-
-
-
-
 def setup(bot: Client, tree: slash.CommandTree) -> None:
     '''Sets up this bot module.'''
 
