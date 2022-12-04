@@ -4,13 +4,15 @@ from util.debug import DEBUG_GUILD
 
 DEBUG = False
 
+# This command will have the bot send a message to a specified text channel 
+# bot will announce the user who initiated the command in the current channel
 @slash.command()
 async def say(interaction: Interaction, channel: TextChannel, message:str,) -> None:
     '''Have Kyoyobot say something in a channel.'''
     
-    text = f'You told me to say \"{message}\" in #{channel.name}\n'
+    text = f'{interaction.user} told me to say \"{message}\" in #{channel.name}\n'
     await channel.send(message)
-    await interaction.response.send_message(text)
+    await interaction.response.send_message(text) 
     
 
 def setup(bot: Client, tree: slash.CommandTree) -> None:
