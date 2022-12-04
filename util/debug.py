@@ -1,6 +1,6 @@
 import discord
 from contextlib import contextmanager
-from typing import Generator, Tuple, Type, Union
+from typing import Generator, Optional, Tuple, Type, Union
 
 async def set_status(bot: discord.Client, message: str) -> None:
     '''Logs a message to the bot's status and the console.'''
