@@ -8,7 +8,7 @@ async def set_status(bot: discord.Client, message: str) -> None:
     await bot.change_presence(activity=discord.Game(name=message))
     print(message)
 
-def error(e: Exception, msg: str = None) -> None:
+def error(e: Exception, msg: Optional[str] = None) -> None:
     '''Logs an error to the console.'''
     
     print('===ERROR!===')
