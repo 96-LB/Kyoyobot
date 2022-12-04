@@ -42,7 +42,7 @@ async def ask(interaction: Interaction, question: str) -> None:
         'My sources say no.',
         'Outlook not so good.',
         'Very doubtful.',
-	    'Kyoyo says no', 
+        'Kyoyo says no',
         'My toesies don\'t tingle :('
 
     ]
