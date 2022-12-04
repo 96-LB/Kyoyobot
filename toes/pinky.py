@@ -27,19 +27,23 @@ async def ask(interaction: Interaction, question: str) -> None:
         'Outlook good.',
         'Yes.',
         'Signs point to yes.',
+        'My toes point to yes.', 
+        'My toesies are tingling, yes!', 
         # Neutral
         'Reply hazy, try again.',
         'Ask again later.',
         'Better not tell you now.',
         'Cannot predict now.',
         'Concentrate and ask again.',
+        'Offer more feet and try again.',
         # Negative
         'Don\'t count on it.',
         'My reply is no.',
         'My sources say no.',
         'Outlook not so good.',
         'Very doubtful.',
-	'Kyoyo says no'
+	    'Kyoyo says no', 
+        'My toesies don\'t tingle :('
 
     ]
 
