@@ -8,7 +8,7 @@ DEBUG = False
 async def say(interaction: Interaction, channel: TextChannel, message:str,) -> None:
     '''Have Kyoyobot say something in a channel.'''
     
-    text = f'You told me to say \"{message}\" in {channel.name}\n'
+    text = f'You told me to say \"{message}\" in #{channel.name}\n'
     await channel.send(message)
     await interaction.response.send_message(text)
     
