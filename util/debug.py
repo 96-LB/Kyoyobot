@@ -1,6 +1,6 @@
 import discord
 from contextlib import contextmanager
-from typing import Generator, Tuple, Type, Union
+from typing import Generator, Optional, Tuple, Type, Union
 
 async def set_status(bot: discord.Client, message: str) -> None:
     '''Logs a message to the bot's status and the console.'''
@@ -8,7 +8,7 @@ async def set_status(bot: discord.Client, message: str) -> None:
     await bot.change_presence(activity=discord.Game(name=message))
     print(message)
 
-def error(e: Exception, msg: str = None) -> None:
+def error(e: Exception, msg: Optional[str] = None) -> None:
     '''Logs an error to the console.'''
     
     print('===ERROR!===')
@@ -18,7 +18,7 @@ def error(e: Exception, msg: str = None) -> None:
     print('============')
 
 @contextmanager
-def catch(types : Union[Type, Tuple[Type, ...]], msg : str = None) -> Generator[None, None, None]:
+def catch(types : Union[Type, Tuple[Type, ...]], msg : Optional[str] = None) -> Generator[None, None, None]:
     '''Catches and handles the specified exception and logs it to the console.'''
     
     try:
