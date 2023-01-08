@@ -1,11 +1,10 @@
 import random, re
 from discord import app_commands as slash, Client, Message
 from functools import wraps
-from typing import Any, Awaitable, Callable, Coroutine, Mapping, Optional, Sequence
-from util.debug import DEBUG_GUILD, catch, error
-from util.settings import Config
+from typing import Any, Awaitable, Callable, Coroutine, Iterable, Mapping, Optional, Sequence
 
-DEBUG = False
+from util.debug import DEBUG, DEBUG_GUILD, catch, error
+from util.settings import Config
 
 Trigger = Callable[[Client, Message], Coroutine[Any, Any, None]]
 TriggerFactory = Callable[..., Trigger]
@@ -13,7 +12,6 @@ TriggerModifier = Callable[[Trigger], Trigger]
 TriggerModifierFactory = Callable[..., TriggerModifier]
 
 async def null_trigger(bot: Client, message: Message, /) -> None: ...
-
 
 ### MODIFIERS ###
 
@@ -42,7 +40,7 @@ def modifier(func: Callable[..., Awaitable[None]]) -> TriggerModifierFactory:
 
 # IMPORTANT!
 # @modifier changes the function signature of each of the following functions
-# to call them, do NOT use `await`, and omit the first three arguments 
+# to call them, do NOT use `await`, and omit the first three arguments
 
 @modifier
 async def if_keyword(bot: Client, message: Message, trigger: Trigger, *, keyword: str, case_sensitive: bool = False, **kwargs: Any) -> None:
@@ -54,7 +52,7 @@ async def if_keyword(bot: Client, message: Message, trigger: Trigger, *, keyword
 @modifier
 async def if_author(bot: Client, message: Message, trigger: Trigger, *, author_id: int, **kwargs: Any) -> None:
     '''Executes the trigger only if the provided ID matches the message author.'''
-   
+    
     if message.author.id == author_id:
         await trigger(bot, message)
 
@@ -99,7 +97,7 @@ async def do_react_custom(bot: Client, message: Message, trigger: Trigger, *, em
 @modifier
 async def do_another(bot: Client, message: Message, trigger: Trigger, *, other: Mapping[str, Any], **kwargs: Any) -> None:
     '''Executes another trigger before this one.'''
-
+    
     other_trigger = create_trigger(**other)
     if other_trigger is not None:
         await other_trigger(bot, message)
@@ -108,13 +106,13 @@ async def do_another(bot: Client, message: Message, trigger: Trigger, *, other: 
 @modifier
 async def do_random(bot: Client, message: Message, trigger: Trigger, *, choices: Mapping[str, Sequence], **kwargs: Any):
     '''Executes another trigger with random arguments before this one.'''
-
+    
     with catch(Exception, f'Triggers :: Failed to execute random trigger!'):
         other = {key: values if key == 'type' else random.choice(values) for key, values in choices.items()}
     
     modified = add_trigger(trigger, other)
     await modified(bot, message)
-    
+
 ### SETUP ###
 
 def add_trigger(trigger: Trigger, other: Mapping[str, Any]):
@@ -122,12 +120,12 @@ def add_trigger(trigger: Trigger, other: Mapping[str, Any]):
 
 def create_trigger(**kwargs: Any) -> Optional[Trigger]:
     '''Creates a trigger by stacking the specified modifier types.'''
-
+    
     types = kwargs.get('type', '')
     try:
         types = types.split()
     except AttributeError as e:
-        error(e, f'Triggers :: Failed to create trigger of unreadable type {types}.')        
+        error(e, f'Triggers :: Failed to create trigger of unreadable type {types}.')
         return None
     
     trigger = null_trigger
@@ -139,19 +137,19 @@ def create_trigger(**kwargs: Any) -> Optional[Trigger]:
         except TypeError as e:
             error(e, f'Triggers :: Failed to create trigger of type {types} because of type "{type}".')
             return None
-
+    
     return trigger
 
-def setup(bot: Client, tree: slash.CommandTree) -> None:
+def setup(bot: Client) -> Iterable[slash.Command]:
     '''Sets up this bot module.'''
-
+    
     trigger = null_trigger
-
+    
     # pulls trigger information from the configuration file
     trigger_config = []
     with catch(TypeError, 'Triggers :: Failed to load trigger configuration!'):
         trigger_config = list(Config.get('triggers')) # type: ignore
-
+    
     for trigger_info in trigger_config:
         # combines the triggers
         trigger = add_trigger(trigger, trigger_info)
@@ -162,6 +160,11 @@ def setup(bot: Client, tree: slash.CommandTree) -> None:
         if message.author == bot.user:
             return
         
-        # execute the master trigger if not in debug mode
-        if not DEBUG or (message.guild is not None and message.guild.id == DEBUG_GUILD.id):
-            await trigger(bot, message)
+        # if in debug mode, only respond in direct messages or the debug server
+        if DEBUG and not (message.guild is None or message.guild.id == DEBUG_GUILD.id):
+            return
+        
+        # execute the master trigger
+        await trigger(bot, message)
+    
+    return []

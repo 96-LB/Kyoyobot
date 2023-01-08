@@ -1,22 +1,20 @@
 import random
-from discord import app_commands as slash, Client, Interaction
-from util.debug import DEBUG_GUILD
-
-DEBUG = False
+from discord import app_commands as slash, Client, Interaction, TextChannel
+from typing import Iterable
 
 @slash.command()
 async def ping(interaction: Interaction) -> None:
-    '''Checks if the bot is running.'''
+    '''Checks if Kyoyobot is running.'''
     
     await interaction.response.send_message('feet')
 
 @slash.command()
 async def ask(interaction: Interaction, question: str) -> None:
     '''Ask a question to the all-knowing Kyoyobot.'''
-
-    # responses from: https://en.wikipedia.org/wiki/Magic_8_Ball#Possible_answers
+    
+    # most responses from: https://en.wikipedia.org/wiki/Magic_8_Ball#Possible_answers
     responses = [
-        # Positive 
+        # Positive
         'It is certain.',
         'It is decidedly so.',
         'Without a doubt.',
@@ -27,8 +25,8 @@ async def ask(interaction: Interaction, question: str) -> None:
         'Outlook good.',
         'Yes.',
         'Signs point to yes.',
-        'My toes point to yes.', 
-        'My toesies are tingling, yes!', 
+        'My toes point to yes.',
+        'My toesies are tingling, yes!',
         # Neutral
         'Reply hazy, try again.',
         'Ask again later.',
@@ -44,18 +42,24 @@ async def ask(interaction: Interaction, question: str) -> None:
         'Very doubtful.',
         'Kyoyo says no',
         'My toesies don\'t tingle :('
-
     ]
-
+    
     text = (
         f'Q: {question}\n'
         f'A: **{random.choice(responses)}**'
     )
-
+    
     await interaction.response.send_message(text)
 
-def setup(bot: Client, tree: slash.CommandTree) -> None:
-    '''Sets up this bot module.'''
+@slash.command()
+async def say(interaction: Interaction, channel: TextChannel, message: str) -> None:
+    '''Instruct Kyoyobot to speak on your behalf.'''
+    
+    text = f'{interaction.user.mention} told me to say \"{message}\" in {channel.mention}\n'
+    await channel.send(message)
+    await interaction.response.send_message(text)
 
-    tree.add_command(ping, guild=(DEBUG_GUILD if DEBUG else None))
-    tree.add_command(ask, guild=(DEBUG_GUILD if DEBUG else None))
+def setup(bot: Client) -> Iterable[slash.Command]:
+    '''Sets up this bot module.'''
+    
+    return [ping, ask, say]

@@ -34,4 +34,5 @@ def catch(types : Union[Type, Tuple[Type, ...]], msg : Optional[str] = None) -> 
 # moved to prevent circular import
 from util.settings import Env
 
-DEBUG_GUILD: discord.Object = discord.Object(id=str(Env.get('DEBUG_GUILD', 0)))
+DEBUG: bool = bool(Env.get('DEBUG', False))
+DEBUG_GUILD: discord.Object = discord.Object(id=str(Env.get('DEBUG_GUILD', 1059681961515425793)))

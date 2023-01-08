@@ -3,7 +3,7 @@ from discord.errors import HTTPException
 from functools import wraps
 from importlib import import_module
 from typing import Any, Callable, Coroutine, TypeVar, cast
-from util.debug import DEBUG_GUILD, error, set_status
+from util.debug import DEBUG, DEBUG_GUILD, error, set_status
 from util.settings import Env
 
 Coro = TypeVar('Coro', bound=Callable[..., Coroutine[Any, Any, Any]])
@@ -36,33 +36,40 @@ tree = discord.app_commands.CommandTree(bot)
 @bot.event
 async def on_ready() -> None:
     '''Initializes the bot.'''
-
+    
     await set_status(bot, 'loading toes...')
-
+    
+    # if in debug mode, sync commands only to the test server
+    guild = DEBUG_GUILD if DEBUG else None
+    
     # iterates over and loads every command group in the toes folder
     toes = [toe.replace('.py', '') for toe in os.listdir('toes') if '.py' in toe]
     for toe in toes:
         print(f'loading {toe} toe...')
+        
         try:
+            # each module returns a list of commands it creates
             module = import_module(f'toes.{toe}')
-            module.setup(bot, tree) # type: ignore
+            commands = module.setup(bot) # type: ignore
+            for command in commands:
+                tree.add_command(command, guild=guild)
         except Exception as e:
             await set_status(bot, f'failed to load {toe} toe!')
             raise e
-
-    # loads the global commands and the debug commands
-    await tree.sync()
-    await tree.sync(guild=DEBUG_GUILD)
-
+    
+    # uploads commands to discord
+    await tree.sync(guild=guild)
+    
     # notifies that the bot is ready
     await set_status(bot, 'with feet')
 
 def run() -> None:
     '''Runs this module.'''
-
+    
     try:
         bot.run(str(Env.get('TOKEN')))
     except HTTPException as e:
+        # accounts for 429 errors if hosting on replit
         if Env.get('HOST') == 'R':
             error(e, 'Failed to start bot! Restarting...')
             subprocess.run(['kill', '1'])
