@@ -52,7 +52,7 @@ def json_settings(filename: str) -> Settings:
     with catch((json.decoder.JSONDecodeError, FileNotFoundError),
                f'Settings :: Failed to load JSON data from {filename}!'):
 
-        with open(filename) as file:
+        with open(filename, encoding='utf8') as file:
             obj = json.loads(file.read())
 
             # force result to be a dictionary
