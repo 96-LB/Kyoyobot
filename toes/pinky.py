@@ -1,6 +1,6 @@
 import random
 from discord import app_commands as slash, Client, Interaction, TextChannel
-from typing import Iterable
+from typing import Iterable, Union
 
 @slash.command()
 async def ping(interaction: Interaction) -> None:
@@ -59,7 +59,7 @@ async def say(interaction: Interaction, channel: TextChannel, message: str) -> N
     await channel.send(message)
     await interaction.response.send_message(text)
 
-def setup(bot: Client) -> Iterable[slash.Command]:
+def setup(bot: Client) -> Iterable[Union[slash.Command, slash.Group]]:
     '''Sets up this bot module.'''
     
     return [ping, ask, say]

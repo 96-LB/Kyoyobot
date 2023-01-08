@@ -1,7 +1,7 @@
 import random, re
 from discord import app_commands as slash, Client, Message
 from functools import wraps
-from typing import Any, Awaitable, Callable, Coroutine, Iterable, Mapping, Optional, Sequence
+from typing import Any, Awaitable, Callable, Coroutine, Iterable, Mapping, Optional, Sequence, Union
 
 from util.debug import DEBUG, DEBUG_GUILD, catch, error
 from util.settings import Config
@@ -140,7 +140,7 @@ def create_trigger(**kwargs: Any) -> Optional[Trigger]:
     
     return trigger
 
-def setup(bot: Client) -> Iterable[slash.Command]:
+def setup(bot: Client) -> Iterable[Union[slash.Command, slash.Group]]:
     '''Sets up this bot module.'''
     
     trigger = null_trigger

@@ -2,7 +2,7 @@ import os, random
 from discord import app_commands as slash, Client, Interaction, Message
 from discord.errors import HTTPException
 from discord.app_commands.errors import CommandAlreadyRegistered
-from typing import Callable, Dict, Iterable, List, Sequence, Tuple
+from typing import Callable, Dict, Iterable, List, Sequence, Tuple, Union
 
 from util.debug import DEBUG, DEBUG_GUILD, catch
 from util.settings import json_settings
@@ -55,7 +55,7 @@ def add_talk_command(group: slash.Group, name: str, description: str = '') -> No
         async def _(interaction: Interaction) -> None:
             await interaction.response.send_message(f'{name.capitalize()}: {markov()}')
 
-def setup(bot: Client) -> Iterable[slash.Command]:
+def setup(bot: Client) -> Iterable[Union[slash.Command, slash.Group]]:
     '''Sets up this bot module.'''
     
     # respond to mentions with kyoyo's markov chain

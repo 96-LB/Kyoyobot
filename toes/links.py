@@ -1,7 +1,7 @@
 from discord import app_commands as slash, Client, Interaction
 from discord.errors import HTTPException
 from discord.app_commands.errors import CommandAlreadyRegistered
-from typing import Iterable
+from typing import Iterable, Union
 
 from util.debug import catch
 from util.settings import Config
@@ -17,7 +17,7 @@ def add_link_command(group: slash.Group, name: str, url: str, description: str =
         async def _(interaction: Interaction) -> None:
             await interaction.response.send_message(str(url), ephemeral=True)
 
-def setup(bot: Client) -> Iterable[slash.Command]:
+def setup(bot: Client) -> Iterable[Union[slash.Command, slash.Group]]:
     '''Sets up this bot module.'''
     
     links = slash.Group(name='links', description='A quick reference of useful links.')
