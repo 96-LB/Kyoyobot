@@ -21,6 +21,19 @@
             "description": "a picture of a tall white rectangle"
         }
     ],
+    
+    "links": [
+        {
+            "name": "github",
+            "url": "https://github.com/96-LB/Kyoyobot",
+            "description": "please submit a pr"
+        },
+        {
+            "name": "kyoyoland",
+            "url": "https://discord.gg/JFHk6QpPVS",
+            "description": "the official \"support\" server (you will find no support)"
+        }
+    ],
 
     "triggers": [
         {
