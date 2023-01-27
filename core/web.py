@@ -18,7 +18,7 @@ def launch_server() -> None:
 
 def run() -> None:
     '''Runs this module.'''
- 
+    
     # imagine paying for server hosting 🐛
     if Env.get('HOST') == 'R':
         server = Thread(target=launch_server)
