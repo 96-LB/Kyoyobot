@@ -13,7 +13,7 @@ discord = "^2.2.2"
 
 [tool.pyright]
 strict = ["**"]
-venvPath = ".venv"
+venv = ".venv"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
