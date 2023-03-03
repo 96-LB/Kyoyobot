@@ -1,9 +1,12 @@
 \!IGNORE
 __pycache__
 venv
+.venv
+.mypy_cache
 
 .breakpoints
 replit.nix
 .replit
 .env
+
 .vscode

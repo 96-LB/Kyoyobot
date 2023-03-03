@@ -1,6 +1,6 @@
 import discord
 from contextlib import contextmanager
-from typing import Generator, Optional, Tuple, Type, Union
+from typing import Any, Generator, Optional, Tuple, Type, Union
 
 async def set_status(bot: discord.Client, message: str) -> None:
     '''Logs a message to the bot's status and the console.'''
@@ -18,7 +18,7 @@ def error(e: Exception, msg: Optional[str] = None) -> None:
     print('============')
 
 @contextmanager
-def catch(types : Union[Type, Tuple[Type, ...]], msg : Optional[str] = None) -> Generator[None, None, None]:
+def catch(types: Union[Type[Any], Tuple[Type[Any], ...]], msg: Optional[str] = None) -> Generator[None, None, None]:
     '''Catches and handles the specified exception and logs it to the console.'''
     
     try:

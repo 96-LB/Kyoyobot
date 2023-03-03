@@ -2,7 +2,7 @@ import discord, os, subprocess
 from discord.errors import HTTPException
 from functools import wraps
 from importlib import import_module
-from typing import Any, Callable, Coroutine, TypeVar, cast
+from typing import Any, Callable, Coroutine, Optional, TypeVar, cast
 from util.debug import DEBUG, DEBUG_GUILD, error, set_status
 from util.settings import Env
 
@@ -13,13 +13,13 @@ class Bot(discord.Client):
     def event(self, new: Coro, /) -> Coro:
         '''Registers a new event without obliterating the old one.'''
         
-        old: Coro = getattr(self, new.__name__, None) # type: ignore
+        old: Optional[Coro] = getattr(self, new.__name__, None)
 
         function: Coro = new
         if old is not None:
             # run both the old function and the new one
             @wraps(new)
-            async def wrapper(*args, **kwargs) -> None:
+            async def wrapper(*args: Any, **kwargs: Any) -> None:
                 await old(*args, **kwargs)
                 await new(*args, **kwargs)
             function = cast(Coro, wrapper) # why do we have to cast?
@@ -50,7 +50,7 @@ async def on_ready() -> None:
         try:
             # each module returns a list of commands it creates
             module = import_module(f'toes.{toe}')
-            commands = module.setup(bot) # type: ignore
+            commands = module.setup(bot)
             for command in commands:
                 tree.add_command(command, guild=guild)
         except Exception as e:
@@ -59,7 +59,7 @@ async def on_ready() -> None:
     
     # uploads commands to discord
     await tree.sync(guild=guild)
-    
+
     # notifies that the bot is ready
     await set_status(bot, 'with feet')
 

@@ -1,5 +1,5 @@
 import os, json
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, cast
 
 from util.debug import catch
 
@@ -57,7 +57,7 @@ def json_settings(filename: str) -> Settings:
             
             # force result to be a dictionary
             if isinstance(obj, dict):
-                return Settings(obj)
+                return Settings(cast(Dict[str, Any], obj))
             else:
                 return Settings({'_data': obj})
 

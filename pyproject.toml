@@ -5,11 +5,14 @@ description = "🐛"
 authors = ["96 LB <96lb@96lb.ml>", "A bunch of other people probably"]
 
 [tool.poetry.dependencies]
-python = ">=3.8.0"
-"discord.py" = {git = "https://github.com/Rapptz/discord.py"}
-Flask = "^2.1.2"
+python = ">=3.11.0"
+flask = "^2.1.2"
+discord = "^2.2.2"
 
 [tool.poetry.dev-dependencies]
+
+[tool.pyright]
+strict = ["**"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

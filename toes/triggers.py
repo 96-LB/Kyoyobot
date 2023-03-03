@@ -1,7 +1,7 @@
 import random, re
 from discord import app_commands as slash, Client, Message
 from functools import wraps
-from typing import Any, Awaitable, Callable, Coroutine, Iterable, Mapping, Optional, Sequence, Union
+from typing import Any, Awaitable, Callable, Coroutine, Iterable, Mapping, Optional, Sequence, cast
 
 from util.debug import DEBUG, DEBUG_GUILD, catch, error
 from util.settings import Config
@@ -15,7 +15,7 @@ async def null_trigger(bot: Client, message: Message, /) -> None: ...
 
 ### MODIFIERS ###
 
-modifiers = {}
+modifiers: dict[str, TriggerModifierFactory] = {}
 
 def modifier(func: Callable[..., Awaitable[None]]) -> TriggerModifierFactory:
     '''Converts a flat trigger modifier into a compositable decorator factory.'''
@@ -88,7 +88,9 @@ async def do_react_custom(bot: Client, message: Message, trigger: Trigger, *, em
     '''Reacts to the message with a custom emoji.'''
     
     with catch(Exception, f'Triggers :: Failed to add custom emoji reaction "{emoji_id}"!'):
-        await message.add_reaction(bot.get_emoji(emoji_id)) # type: ignore
+        emoji = bot.get_emoji(emoji_id)
+        if emoji:
+            await message.add_reaction(emoji)
     
     await trigger(bot, message)
 
@@ -104,7 +106,7 @@ async def do_another(bot: Client, message: Message, trigger: Trigger, *, other: 
     await trigger(bot, message)
 
 @modifier
-async def do_random(bot: Client, message: Message, trigger: Trigger, *, choices: Mapping[str, Sequence], **kwargs: Any):
+async def do_random(bot: Client, message: Message, trigger: Trigger, *, choices: Mapping[str, Sequence[Any]], **kwargs: Any):
     '''Executes another trigger with random arguments before this one.'''
     
     with catch(Exception, f'Triggers :: Failed to execute random trigger!'):
@@ -131,30 +133,29 @@ def create_trigger(**kwargs: Any) -> Optional[Trigger]:
     trigger = null_trigger
     for type in reversed(types):
         try:
-            modifier_factory = modifiers.get(type)
-            modifier = modifier_factory(**kwargs) # type: ignore
+            modifier_factory = modifiers[type]
+            modifier = modifier_factory(**kwargs)
             trigger = modifier(trigger)
-        except TypeError as e:
+        except IndexError as e:
             error(e, f'Triggers :: Failed to create trigger of type {types} because of type "{type}".')
             return None
     
     return trigger
 
-def setup(bot: Client) -> Iterable[Union[slash.Command, slash.Group]]:
+def setup(bot: Client) -> Iterable[slash.Command[Any, ..., Any] | slash.Group]:
     '''Sets up this bot module.'''
     
     trigger = null_trigger
     
     # pulls trigger information from the configuration file
-    trigger_config = []
+    trigger_config: list[dict[str, Any]] = []
     with catch(TypeError, 'Triggers :: Failed to load trigger configuration!'):
-        trigger_config = list(Config.get('triggers')) # type: ignore
+        trigger_config = cast(list[dict[str, Any]], Config.get('triggers'))
     
     for trigger_info in trigger_config:
         # combines the triggers
         trigger = add_trigger(trigger, trigger_info)
     
-    @bot.event
     async def on_message(message: Message) -> None:
         # ignore messages sent by the bot to prevent infinite loops
         if message.author == bot.user:
@@ -166,5 +167,6 @@ def setup(bot: Client) -> Iterable[Union[slash.Command, slash.Group]]:
         
         # execute the master trigger
         await trigger(bot, message)
+    bot.event(on_message)
     
     return []

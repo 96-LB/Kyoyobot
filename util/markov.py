@@ -1,5 +1,5 @@
 import json
-from typing import Dict, List, Iterable
+from typing import Any, Dict, List, Iterable
 
 # This module is not for use with the bot, but rather as additional utility.
 
@@ -12,13 +12,13 @@ def dce_to_messages(filenames: Iterable[str], users: Dict[str, str]):
         # attempt to load each file in JSON format
         try:
             with open(filename, encoding='utf8') as file:
-                messages = json.loads(file.read()).get('messages', [])
+                messages: list[dict[str, Any]] = json.loads(file.read()).get('messages', [])
         except:
             messages = []
         
         # check if the message is valid, and collect it if so
         for message in messages:
-            user = users.get(message.get('author', {}).get('id'))
+            user = users.get(message.get('author', {}).get('id', ''))
             content = message.get('content')
             if user and content and message.get('type') == 'Default':
                 output[user].append(content)
@@ -53,7 +53,7 @@ def messages_to_markov(messages: Iterable[str]):
     
     return obj
 
-def export(markov: dict, name: str):
+def export(markov: dict[str, Any], name: str):
     '''Saves a Markov chain with the specified name.'''
     
     with open(f'data/markov/{name}.jason', 'w') as file:
