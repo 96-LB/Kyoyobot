@@ -2,7 +2,7 @@ import os, random
 from discord import app_commands as slash, Client, Interaction, Message
 from discord.errors import HTTPException
 from discord.app_commands.errors import CommandAlreadyRegistered
-from typing import Callable, Dict, Iterable, List, Sequence, Tuple, Union
+from typing import Any, Callable, Iterable, Sequence, Tuple
 
 from util.debug import DEBUG, DEBUG_GUILD, catch
 from util.settings import json_settings
@@ -15,12 +15,10 @@ def get_markov(name: str) -> Callable[[], str]:
     config = json_settings(f'data/markov/{name}.jason')
     
     # load the data from the markov chain data file
-    word_data: Dict[str, Tuple[Sequence[str], Sequence[int]]] = {}
+    word_data: dict[str, Tuple[Sequence[str], Sequence[int]]] = {}
     for word in config.keys():
-        # these types can't be inferred so we can just ignore for now
-        # we should do some error checking later though
-        data = config[word] # type: ignore
-        word_data[word] = tuple(zip(*data.items())) # type: ignore
+        data: dict[str, int] = config[word]
+        word_data[word] = (tuple(data.keys()), tuple(data.values()))
     
     def choose_word(word: str):
         '''Chooses a random word to follow the provided word in the generated text.'''
@@ -31,7 +29,7 @@ def get_markov(name: str) -> Callable[[], str]:
     def markov() -> str:
         '''Generates a message using the Markov chain.'''
         
-        words: List[str] = []
+        words: list[str] = []
         word: str = choose_word('')
         
         # the empty string represents the start and end of the message
@@ -55,13 +53,12 @@ def add_talk_command(group: slash.Group, name: str, description: str = '') -> No
         async def _(interaction: Interaction) -> None:
             await interaction.response.send_message(f'{name.capitalize()}: {markov()}')
 
-def setup(bot: Client) -> Iterable[Union[slash.Command, slash.Group]]:
+def setup(bot: Client) -> Iterable[slash.Command[Any, ..., Any] | slash.Group]:
     '''Sets up this bot module.'''
     
     # respond to mentions with kyoyo's markov chain
     markov = get_markov('kyoyo')
     
-    @bot.event
     async def on_message(message: Message) -> None:
         # ignore messages sent by the bot to prevent infinite loops
         if message.author == bot.user:
@@ -74,7 +71,7 @@ def setup(bot: Client) -> Iterable[Union[slash.Command, slash.Group]]:
         # respond to mentions with the markov chain
         if bot.user is not None and bot.user.mentioned_in(message):
             await message.channel.send(markov())
-    
+    bot.event(on_message)
     
     # also add each available markov chain as a slash command
     talk = slash.Group(name='talk', description='Simulate conversations with people who don\'t want to talk to you.')
