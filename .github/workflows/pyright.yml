@@ -29,4 +29,4 @@ jobs:
         pip install poetry pyright
         poetry install
     - name: Lint with pyright
-      run: echo python -m pyright
+      run: python -m pyright
