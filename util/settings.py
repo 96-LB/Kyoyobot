@@ -1,16 +1,16 @@
 import os, json
-from typing import Any, Callable, Dict, List, Optional, cast
+from typing import Any, Callable, Optional, cast
 
 from util.debug import catch
 
 class Settings():
     '''Handles configuration data.'''
     
-    _data: Dict[str, Any]
+    _data: dict[str, Any]
     _callback: Optional[Callable[[str], Any]]
     
     def __init__(self,
-                 data: Dict[str, Any],
+                 data: dict[str, Any],
                  callback: Optional[Callable[[str], Any]] = None):
         self._data = data
         self._callback = callback
@@ -30,7 +30,7 @@ class Settings():
         
         return obj if obj is not None else default
     
-    def keys(self) -> List[str]:
+    def keys(self) -> list[str]:
         '''Returns list of all keys.'''
         
         return list(self._data.keys())
@@ -57,7 +57,7 @@ def json_settings(filename: str) -> Settings:
             
             # force result to be a dictionary
             if isinstance(obj, dict):
-                return Settings(cast(Dict[str, Any], obj))
+                return Settings(cast(dict[str, Any], obj))
             else:
                 return Settings({'_data': obj})
 
@@ -65,7 +65,7 @@ def json_settings(filename: str) -> Settings:
 def env_settings(filename: str) -> Settings:
     '''Loads configuration settings stored in key=value format.'''
     
-    obj: Dict[str, str] = {}
+    obj: dict[str, str] = {}
     with catch(FileNotFoundError,
                f'Settings :: Failed to load ENV data from {filename}!'):
         
