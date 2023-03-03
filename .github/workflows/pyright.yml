@@ -30,4 +30,4 @@ jobs:
         poetry config virtualenvs.in-project true
         poetry install
     - name: Lint with pyright
-      run: python -m pyright
+      run: echo "python -m pyright" | poetry shell
