@@ -39,7 +39,7 @@
         {
             "type": "if_keyword if_lucky do_random",
             "keyword": "\\?$",
-            "probability": 10,
+            "probability": 5,
             "choices": {
                 "type": "do_text",
                 "text": [
@@ -54,9 +54,54 @@
             }
         },
         {
-            "type": "if_lucky do_text",
+            "type": "if_keyword if_lucky do_random",
+            "keyword": "^who.*\\?$",
+            "probability": 25,
+            "choices": {
+                "type": "do_text",
+                "text": [
+                    "me",
+                    "you",
+                    "kyoyo",
+                    "cap",
+                    "vexor",
+                    "bingus",
+                    "justin",
+                    "kruskal",
+                    "nobody",
+                    "everybody"
+                ]
+            }
+        },
+        {
+            "type": "if_keyword if_lucky do_random",
+            "keyword": "^i$|^i-$",
+            "probability": 50,
+            "choices": {
+                "type": "do_text",
+                "text": [
+                    "am breathing",
+                    "am beautiful",
+                    "am brilliant",
+                    "am ugly",
+                    "am stupid",
+                    "u",
+                    "you what?"
+                ]
+            }
+        },
+        {
+            "type": "if_lucky do_random",
             "probability": 0.1,
-            "text": "I love feet 😍"
+            "choices": {
+                "type": "do_text",
+                "text": [
+                    "I love feet 😍",
+                    "feet 😋🤤",
+                    "feet pics? :o",
+                    "i like toesie-woesies"
+                ]
+            }
         },
         {
             "type": "if_keyword if_lucky do_text",
@@ -72,15 +117,70 @@
         },
         {
             "type": "if_keyword if_lucky do_text",
-            "keyword": "kyoyo",
-            "probability": 1,
+            "keyword": "kyoyo|kyoyobot",
+            "probability": 5,
             "text": "hi"
         },
         {
             "type": "if_keyword if_lucky do_text",
-            "keyword": "\\ba-\\b",
-            "probability": 5,
+            "keyword": "\\ba-\\B",
+            "probability": 25,
             "text": "why not a+?"
+        },
+        {
+            "type": "if_keyword if_lucky do_text",
+            "keyword": "fart club",
+            "probability": 2.5,
+            "text": "fart club"
+        },
+        {
+            "type": "if_keyword if_lucky do_random",
+            "keyword": "anders|bingus",
+            "probability": 5,
+            "choices": {
+                "type": "do_text",
+                "text": [
+                    "Landers",
+                    "sanders"
+                ]
+            }
+        },
+        {
+            "type": "if_keyword if_lucky do_random",
+            "keyword": "sanketh|vexor",
+            "probability": 5,
+            "choices": {
+                "type": "do_text",
+                "text": [
+                    "sunketh",
+                    "senkath"
+                ]
+            }
+        },
+        {
+            "type": "if_keyword if_lucky do_random",
+            "keyword": "kruskal",
+            "probability": 5,
+            "choices": {
+                "type": "do_text",
+                "text": [
+                    "kruskaL",
+                    "Wruskal"
+                ]
+            }
+        },
+        {
+            "type": "if_keyword if_lucky do_random",
+            "keyword": "justin",
+            "probability": 5,
+            "choices": {
+                "type": "do_text",
+                "text": [
+                    "Lustin",
+                    "Wustin",
+                    "sustin"
+                ]
+            }
         },
         {
             "type": "if_keyword if_lucky do_react",
