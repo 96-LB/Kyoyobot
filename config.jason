@@ -39,7 +39,7 @@
         {
             "type": "if_keyword if_lucky do_random",
             "keyword": "\\?$",
-            "probability": 10,
+            "probability": 5,
             "choices": {
                 "type": "do_text",
                 "text": [
@@ -81,6 +81,12 @@
             "keyword": "\\ba-\\b",
             "probability": 5,
             "text": "why not a+?"
+        },
+        {
+            "type": "if_keyword if_lucky do_text",
+            "keyword": "fart club",
+            "probability": 2.5,
+            "text": "fart club"
         },
         {
             "type": "if_keyword if_lucky do_react",
