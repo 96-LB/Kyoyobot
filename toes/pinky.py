@@ -1,7 +1,7 @@
 import random
 from discord import app_commands as slash, Client, Interaction, TextChannel
-from typing import Any, Iterable
 from uwuipy import uwuipy
+from typing import Any, Iterable
 
 UWU = uwuipy()
 
@@ -50,7 +50,7 @@ async def ask(interaction: Interaction, question: str) -> None:
     response = random.choice(responses)
     if random.random() < 0.3:
         # 30% chance of uwuifying response
-        response = UWU.uwuify(response) # type: ignore
+        response = UWU.uwuify(response)
     text = (
         f'Q: {question}\n'
         f'A: **{response}**'
