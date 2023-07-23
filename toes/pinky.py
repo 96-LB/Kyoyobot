@@ -50,7 +50,7 @@ async def ask(interaction: Interaction, question: str) -> None:
     response = random.choice(responses)
     if random.random() < 0.3:
         # 30% chance of uwuifying response
-        response = UWU.uwuify(response)
+        response = UWU.uwuify(response) # type: ignore
     text = (
         f'Q: {question}\n'
         f'A: **{response}**'
