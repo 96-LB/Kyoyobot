@@ -1,6 +1,9 @@
 import random
 from discord import app_commands as slash, Client, Interaction, TextChannel
+from uwuipy import uwuipy
 from typing import Any, Iterable
+
+UWU = uwuipy()
 
 @slash.command()
 async def ping(interaction: Interaction) -> None:
@@ -44,9 +47,13 @@ async def ask(interaction: Interaction, question: str) -> None:
         'My toesies don\'t tingle :('
     ]
     
+    response = random.choice(responses)
+    if random.random() < 0.3:
+        # 30% chance of uwuifying response
+        response = UWU.uwuify(response)
     text = (
         f'Q: {question}\n'
-        f'A: **{random.choice(responses)}**'
+        f'A: **{response}**'
     )
     
     await interaction.response.send_message(text)

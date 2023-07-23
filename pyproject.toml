@@ -5,9 +5,10 @@ description = "🐛"
 authors = ["96 LB <96lb@96lb.ml>", "A bunch of other people probably"]
 
 [tool.poetry.dependencies]
-python = ">=3.10.0"
+python = "^3.10.0"
 flask = "^2.1.2"
 "discord.py" = "^2.2.2"
+uwuipy = "^0.1.6"
 
 [tool.poetry.dev-dependencies]
 
